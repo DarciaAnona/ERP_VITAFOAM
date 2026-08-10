@@ -324,6 +324,30 @@
   .empty-state .big{font-size:2.6rem; margin-bottom:12px;}
   .empty-state h2{color:var(--navy-deep); margin-bottom:8px;}
 
+  /* ---------- ARTICLE LIST / SEARCH / CRUD ---------- */
+  .search-bar{padding:16px 22px 0;}
+  .search-bar input{
+    width:100%; padding:12px 14px; border-radius:12px; border:1.5px solid #e1e6ee;
+    background:#f8fafc; font-size:.92rem; font-family:inherit;
+  }
+  .search-bar input:focus{border-color:var(--blue); background:var(--white);}
+  .row-actions{display:flex; gap:6px; flex-wrap:wrap;}
+  .row-actions button{
+    border:1.5px solid #e1e6ee; background:var(--white); border-radius:8px;
+    padding:5px 9px; font-size:.78rem; font-weight:700; cursor:pointer; color:var(--navy);
+  }
+  .row-actions button:hover{border-color:var(--blue);}
+  .row-actions button.danger{color:var(--danger);}
+  .row-actions button.danger:hover{border-color:var(--danger);}
+  .code-link{background:none; border:none; padding:0; font-weight:700; color:var(--blue); cursor:pointer; text-decoration:underline;}
+  .info-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; padding:22px;}
+  .info-box{background:#f8fafc; border:1.5px solid #eef1f6; border-radius:14px; padding:16px 18px;}
+  .info-box .label{font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:#8592a8; font-weight:700;}
+  .info-box .value{font-family:'Poppins',sans-serif; font-size:1.25rem; font-weight:800; color:var(--navy-deep); margin-top:6px;}
+  .info-box .sub{font-size:.78rem; color:#8592a8; margin-top:4px;}
+  .btn-export{background:var(--yellow); color:var(--navy-deep); border:none; padding:11px 20px; border-radius:999px; font-weight:700; font-size:.85rem; cursor:pointer;}
+  .btn-export:hover{background:var(--yellow-deep);}
+
   @media (max-width:640px){
     .navbar .btn{padding:10px 16px; font-size:.85rem;}
     .strip{gap:20px;}
@@ -420,12 +444,7 @@
       <button class="menu-card" type="button" id="card-stock">
         <div class="icon">📦</div>
         <h3>Stock</h3>
-        <p>Disponible &amp; valorisé</p>
-      </button>
-      <button class="menu-card" type="button" id="card-cout">
-        <div class="icon">💰</div>
-        <h3>Coût</h3>
-        <p>Coût standard, PMP, dernier achat</p>
+        <p>État de stock &amp; extraction</p>
       </button>
       <button class="menu-card" type="button" id="card-production">
         <div class="icon">🏭</div>
@@ -504,272 +523,209 @@
 </section>
 
 <!-- ============ ARTICLE — MENU ============ -->
-<section id="screen-article-menu" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-menu-from-article-menu">← Menu</button>
-      <button class="logout-btn" id="btn-logout-article-menu">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
-    <div class="dash-head">
-      <div>
-        <h2>Article</h2>
-        <p>Créer un article ou consulter la base existante</p>
-      </div>
-    </div>
-    <div class="menu-grid">
-      <button class="menu-card" type="button" id="card-article-create">
-        <div class="icon">🏷️</div>
-        <h3>Créer un article</h3>
-        <p>Générer un nouveau code article</p>
-      </button>
-      <button class="menu-card" type="button" id="card-article-list">
-        <div class="icon">📋</div>
-        <h3>Articles créés</h3>
-        <p>Consulter la base des articles</p>
-      </button>
-      <button class="menu-card" type="button" id="card-article-mousse">
-        <div class="icon">🧽</div>
-        <h3>Gestion mousse</h3>
-        <p>Surface &amp; volume mousse</p>
-      </button>
-      <button class="menu-card" type="button" id="card-article-tissus">
-        <div class="icon">🧵</div>
-        <h3>Gestion tissus</h3>
-        <p>Quantité de tissus consommée</p>
-      </button>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ARTICLE — CRÉATEUR ============ -->
+<!-- ============ ARTICLE — CRÉATEUR + LISTE/RECHERCHE ============ -->
 <section id="screen-article-create" class="screen">
   <div class="dash-top">
     <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
     <div class="who">
-      <button class="logout-btn" id="btn-hub-from-article-create">← Article</button>
+      <button class="logout-btn" id="btn-menu-from-article-create">← Menu</button>
       <button class="logout-btn" id="btn-logout-article-create">Déconnexion</button>
     </div>
   </div>
   <div class="dash-wrap">
     <div class="dash-head">
       <div>
-        <h2>Créateur de code article</h2>
-        <p>Renseignez les caractéristiques puis créez l'article</p>
+        <h2 id="art-form-title">Créateur de code article</h2>
+        <p id="art-form-subtitle">Renseignez les caractéristiques puis créez l'article</p>
       </div>
     </div>
 
     <div id="art-banner" class="art-banner" style="display:none;"></div>
 
-    <div class="panel">
-      <div class="panel-head"><h3>Gestion stock</h3></div>
-      <div style="padding:22px;">
-        <div class="form-grid">
-          <div class="field">
-            <label>Cet article est-il géré en stock ?</label>
-            <div class="radio-row">
-              <label><input type="radio" name="art-gestion-stock" id="art-gestion-stock-oui" value="oui" checked> Géré en stock</label>
-              <label><input type="radio" name="art-gestion-stock" id="art-gestion-stock-non" value="non"> Non géré en stock</label>
+    <div class="article-layout">
+      <div class="article-panel-carac">
+
+        <div class="panel" style="margin-bottom:20px;">
+          <div class="panel-head"><h3>Gestion stock</h3></div>
+          <div style="padding:22px;">
+            <div class="form-grid">
+              <div class="field">
+                <label>Cet article est-il géré en stock ?</label>
+                <div class="radio-row">
+                  <label><input type="radio" name="art-gestion-stock" id="art-gestion-stock-oui" value="oui" checked> Géré en stock</label>
+                  <label><input type="radio" name="art-gestion-stock" id="art-gestion-stock-non" value="non"> Non géré en stock</label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="panel" id="art-site-depot-panel">
-      <div class="panel-head"><h3>Article site &amp; dépôt</h3></div>
-      <div style="padding:22px;">
-        <div class="form-grid">
-          <div class="field">
-            <label for="art-site">Article site</label>
-            <select id="art-site"></select>
-          </div>
-          <div class="field">
-            <label for="art-depot">Dépôt</label>
-            <select id="art-depot"></select>
+        <div class="panel" id="art-site-depot-panel" style="margin-bottom:20px;">
+          <div class="panel-head"><h3>Article site &amp; dépôt</h3></div>
+          <div style="padding:22px;">
+            <div class="form-grid">
+              <div class="field">
+                <label for="art-site">Article site</label>
+                <select id="art-site"></select>
+              </div>
+              <div class="field">
+                <label for="art-depot">Dépôt</label>
+                <select id="art-depot"></select>
+              </div>
+            </div>
+            <p style="font-size:.85rem; color:#5a6b80; margin-top:4px;">Un même code article peut être géré dans plusieurs dépôts : c'est le dépôt choisi ici qui différencie chaque ligne de stock.</p>
           </div>
         </div>
-        <p style="font-size:.85rem; color:#5a6b80; margin-top:4px;">Un même code article peut être géré dans plusieurs dépôts : c'est le dépôt choisi ici qui différencie chaque ligne de stock.</p>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Caractéristiques</h3></div>
+          <div style="padding:22px;">
+            <div class="form-grid">
+              <div class="field">
+                <label for="art-categorie">Catégorie</label>
+                <select id="art-categorie">
+                  <option value="PF">PF — Produit fini</option>
+                  <option value="MP">MP — Matière Première</option>
+                  <option value="PSF">PSF — Produit Semi Fini</option>
+                  <option value="NEG">NEG — Négoce</option>
+                  <option value="DIVERS">DIVERS</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="art-societe">Code société</label>
+                <select id="art-societe">
+                  <option value="VT">VT</option>
+                  <option value="VD">VD</option>
+                  <option value="VS">VS</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="art-nature">Nature</label>
+                <select id="art-nature"></select>
+              </div>
+              <div class="field">
+                <label for="art-longueur">Longueur (cm)</label>
+                <input type="number" id="art-longueur" placeholder="ex : 190">
+              </div>
+              <div class="field">
+                <label for="art-largeur">Largeur (cm)</label>
+                <input type="number" id="art-largeur" placeholder="ex : 140">
+              </div>
+              <div class="field">
+                <label for="art-hauteur">Hauteur (cm)</label>
+                <input type="number" id="art-hauteur" placeholder="ex : 14">
+              </div>
+              <div class="field">
+                <label for="art-tissus">Tissus</label>
+                <select id="art-tissus"></select>
+              </div>
+              <div class="field">
+                <label>Gaine</label>
+                <div class="radio-row">
+                  <label><input type="radio" name="art-gaine" id="art-gaine-non" value="non" checked> Non</label>
+                  <label><input type="radio" name="art-gaine" id="art-gaine-oui" value="oui"> Oui</label>
+                </div>
+              </div>
+              <div class="field" id="art-gaine-code-field" style="display:none;">
+                <label for="art-gaine-code">Code gaine</label>
+                <input type="text" id="art-gaine-code" placeholder="Saisir le code gaine (usage interne)">
+              </div>
+              <div class="field" id="art-colle-field" style="display:none;">
+                <label for="art-colle">Type de colle</label>
+                <select id="art-colle"></select>
+              </div>
+              <div class="field" style="grid-column:1 / -1;">
+                <label for="art-intitule">Intitulé article (saisie manuelle)</label>
+                <input type="text" id="art-intitule" placeholder="Désignation de l'article">
+              </div>
+            </div>
+
+            <div class="simple-result">
+              <span class="simple-result-label">Aperçu du code :</span>
+              <span class="simple-result-code" id="art-code-result">—</span>
+              <span class="simple-result-desig" id="art-intitule-result"></span>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-cancel" id="art-cancel-btn">Annuler</button>
+              <button type="button" class="btn-create" id="art-create-btn">Créer l'article</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="article-result-side">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Articles créés</h3>
+            <button type="button" class="btn-export" id="btn-export-articles">⬇️ Export CSV</button>
+          </div>
+          <div class="search-bar">
+            <input type="text" id="art-search" placeholder="Rechercher par code, nature, désignation, tissus…">
+          </div>
+          <p id="article-list-count" style="padding:10px 22px 0; font-size:.85rem; color:#6b7891;">Base des articles créés</p>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr><th>Code article</th><th>Désignation</th><th>Nature</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="article-list-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ARTICLE — DÉTAIL ============ -->
+<section id="screen-article-detail" class="screen">
+  <div class="dash-top">
+    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
+    <div class="who">
+      <button class="logout-btn" id="btn-list-from-article-detail">← Articles</button>
+      <button class="logout-btn" id="btn-logout-article-detail">Déconnexion</button>
+    </div>
+  </div>
+  <div class="dash-wrap">
+    <div class="dash-head">
+      <div>
+        <h2 id="detail-code">—</h2>
+        <p id="detail-intitule">Fiche article</p>
+      </div>
+      <div class="row-actions">
+        <button type="button" id="btn-detail-edit">✏️ Modifier</button>
+        <button type="button" class="danger" id="btn-detail-delete">🗑️ Supprimer</button>
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel" style="margin-bottom:20px;">
       <div class="panel-head"><h3>Caractéristiques</h3></div>
-      <div style="padding:22px;">
-        <div class="form-grid">
-          <div class="field">
-            <label for="art-categorie">Catégorie</label>
-            <select id="art-categorie">
-              <option value="PF">PF — Produit fini</option>
-              <option value="MP">MP — Matière Première</option>
-              <option value="PSF">PSF — Produit Semi Fini</option>
-              <option value="NEG">NEG — Négoce</option>
-              <option value="DIVERS">DIVERS</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="art-societe">Code société</label>
-            <select id="art-societe">
-              <option value="VT">VT</option>
-              <option value="VD">VD</option>
-              <option value="VS">VS</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="art-nature">Nature</label>
-            <select id="art-nature"></select>
-          </div>
-          <div class="field">
-            <label for="art-longueur">Longueur (cm)</label>
-            <input type="number" id="art-longueur" placeholder="ex : 190">
-          </div>
-          <div class="field">
-            <label for="art-largeur">Largeur (cm)</label>
-            <input type="number" id="art-largeur" placeholder="ex : 140">
-          </div>
-          <div class="field">
-            <label for="art-hauteur">Hauteur (cm)</label>
-            <input type="number" id="art-hauteur" placeholder="ex : 14">
-          </div>
-          <div class="field">
-            <label for="art-tissus">Tissus</label>
-            <select id="art-tissus"></select>
-          </div>
-          <div class="field">
-            <label>Gaine</label>
-            <div class="radio-row">
-              <label><input type="radio" name="art-gaine" id="art-gaine-non" value="non" checked> Non</label>
-              <label><input type="radio" name="art-gaine" id="art-gaine-oui" value="oui"> Oui</label>
-            </div>
-          </div>
-          <div class="field" id="art-gaine-code-field" style="display:none;">
-            <label for="art-gaine-code">Code gaine</label>
-            <input type="text" id="art-gaine-code" placeholder="Saisir le code gaine (usage interne)">
-          </div>
-          <div class="field" id="art-colle-field" style="display:none;">
-            <label for="art-colle">Type de colle</label>
-            <select id="art-colle"></select>
-          </div>
-          <div class="field" style="grid-column:1 / -1;">
-            <label for="art-intitule">Intitulé article (saisie manuelle)</label>
-            <input type="text" id="art-intitule" placeholder="Désignation de l'article">
-          </div>
-        </div>
-
-        <div class="simple-result">
-          <span class="simple-result-label">Aperçu du code :</span>
-          <span class="simple-result-code" id="art-code-result">—</span>
-          <span class="simple-result-desig" id="art-intitule-result"></span>
-        </div>
-
-        <div class="form-actions">
-          <button type="button" class="btn-cancel" id="art-cancel-btn">Annuler</button>
-          <button type="button" class="btn-create" id="art-create-btn">Créer l'article</button>
-        </div>
-      </div>
+      <div class="info-grid" id="detail-carac-grid"></div>
     </div>
-  </div>
-</section>
 
-<!-- ============ ARTICLE — LISTE ============ -->
-<section id="screen-article-list" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-hub-from-article-list">← Article</button>
-      <button class="logout-btn" id="btn-logout-article-list">Déconnexion</button>
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-head"><h3>Mousse &amp; tissus</h3></div>
+      <div class="info-grid" id="detail-mousse-tissus-grid"></div>
     </div>
-  </div>
-  <div class="dash-wrap">
-    <div class="dash-head">
-      <div>
-        <h2>Articles créés</h2>
-        <p id="article-list-count">Base des articles créés</p>
-      </div>
+
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-head"><h3>Coût</h3></div>
+      <div class="info-grid" id="detail-cout-grid"></div>
+      <p id="detail-cout-note" style="padding:0 22px 18px; font-size:.82rem; color:#5a6b80;"></p>
     </div>
+
     <div class="panel">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Code article</th><th>Désignation</th><th>Nature</th>
-              <th>L×l×H (cm)</th><th>Tissus</th><th>Gaine</th><th>Créé le</th>
-            </tr>
-          </thead>
-          <tbody id="article-list-body"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ARTICLE — GESTION MOUSSE ============ -->
-<section id="screen-article-mousse" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-hub-from-article-mousse">← Article</button>
-      <button class="logout-btn" id="btn-logout-article-mousse">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
-    <div class="dash-head">
-      <div>
-        <h2>Gestion mousse</h2>
-        <p>Surface et volume de mousse calculés à partir des dimensions (longueur × largeur, en m²/m³)</p>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Code article</th><th>Désignation</th><th>L×l×H (cm)</th>
-              <th>Surface mousse (m²)</th><th>Volume mousse (m³)</th>
-            </tr>
-          </thead>
-          <tbody id="article-mousse-body"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ARTICLE — GESTION TISSUS ============ -->
-<section id="screen-article-tissus" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-hub-from-article-tissus">← Article</button>
-      <button class="logout-btn" id="btn-logout-article-tissus">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
-    <div class="dash-head">
-      <div>
-        <h2>Gestion tissus</h2>
-        <p>Quantité de tissus consommée, calculée à partir des dimensions (en m²)</p>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Code article</th><th>Désignation</th><th>Tissus</th><th>L×l×H (cm)</th>
-              <th>Conso. unitaire (m²)</th>
-            </tr>
-          </thead>
-          <tbody id="article-tissus-body"></tbody>
-        </table>
-      </div>
+      <div class="panel-head"><h3>Stock</h3></div>
+      <div class="info-grid" id="detail-stock-grid"></div>
+      <p style="padding:0 22px 18px; font-size:.82rem; color:#5a6b80;">La quantité disponible s'activera dès que le module Entrées / Sorties de stock sera mis en place.</p>
     </div>
   </div>
 </section>
 
 <!-- ============ STOCK — HUB ============ -->
+<!-- ============ STOCK — EXTRACTION / ÉTAT DE STOCK ============ -->
 <section id="screen-stock" class="screen">
   <div class="dash-top">
     <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
@@ -782,164 +738,62 @@
     <div class="dash-head">
       <div>
         <h2>Stock</h2>
-        <p>Suivi du stock par article, site et dépôt</p>
+        <p>État de stock par société, site et dépôt — extraction mensuelle exportable</p>
       </div>
     </div>
-    <div class="menu-grid">
-      <button class="menu-card" type="button" id="card-stock-dispo">
-        <div class="icon">📦</div>
-        <h3>Stock disponible</h3>
-        <p>Quantités disponibles par dépôt</p>
-      </button>
-      <button class="menu-card" type="button" id="card-stock-valorise">
-        <div class="icon">💵</div>
-        <h3>Stock valorisé</h3>
-        <p>Quantités × coût, par dépôt</p>
-      </button>
-    </div>
-  </div>
-</section>
 
-<!-- ============ STOCK — DISPONIBLE (en attente du module Entrées/Sorties) ============ -->
-<section id="screen-stock-dispo" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-hub-from-stock-dispo">← Stock</button>
-      <button class="logout-btn" id="btn-logout-stock-dispo">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
-    <div class="empty-state">
-      <div class="big">📦</div>
-      <h2>Stock disponible</h2>
-      <p>Cet écran affichera la quantité disponible par article, site et dépôt dès que le module Entrées / Sorties de stock sera mis en place. Il s'appuiera sur les articles déjà créés et gérés en stock.</p>
-    </div>
-  </div>
-</section>
+    <div id="stock-banner" class="art-banner info">⚠️ Les quantités disponibles resteront à 0 tant que le module Entrées / Sorties de stock n'est pas en place. Le prix de revient unitaire (coût standard) et les filtres sont déjà fonctionnels.</div>
 
-<!-- ============ STOCK — VALORISÉ (en attente du module Entrées/Sorties) ============ -->
-<section id="screen-stock-valorise" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-hub-from-stock-valorise">← Stock</button>
-      <button class="logout-btn" id="btn-logout-stock-valorise">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
-    <div class="empty-state">
-      <div class="big">💵</div>
-      <h2>Stock valorisé</h2>
-      <p>Cet écran multipliera la quantité disponible par le coût (standard ou PMP) de chaque article dès que le module Entrées / Sorties de stock sera mis en place.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ============ COÛT — HUB ============ -->
-<section id="screen-cout-menu" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-menu-from-cout-menu">← Menu</button>
-      <button class="logout-btn" id="btn-logout-cout-menu">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
-    <div class="dash-head">
-      <div>
-        <h2>Coût</h2>
-        <p>Coût standard, PMP (CMUP) et prix de dernier achat</p>
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-head"><h3>Filtres d'extraction</h3></div>
+      <div style="padding:22px;">
+        <div class="form-grid">
+          <div class="field">
+            <label for="stock-societe">Société</label>
+            <select id="stock-societe">
+              <option value="">Toutes</option>
+              <option value="VT">VT</option>
+              <option value="VD">VD</option>
+              <option value="VS">VS</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="stock-site">Article site</label>
+            <select id="stock-site">
+              <option value="">Tous</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="stock-depot">Dépôt</label>
+            <select id="stock-depot">
+              <option value="">Tous</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="stock-mois">Mois</label>
+            <input type="month" id="stock-mois">
+          </div>
+        </div>
+        <div class="form-actions" style="justify-content:flex-start;">
+          <button type="button" class="btn-create" id="stock-extraire-btn">Extraire l'état de stock</button>
+          <button type="button" class="btn-export" id="stock-export-btn">⬇️ Export CSV</button>
+        </div>
       </div>
     </div>
-    <div class="menu-grid">
-      <button class="menu-card" type="button" id="card-cout-standard">
-        <div class="icon">🧮</div>
-        <h3>Coût standard</h3>
-        <p>Calcul automatique par article</p>
-      </button>
-      <button class="menu-card" type="button" id="card-cout-pmp">
-        <div class="icon">📈</div>
-        <h3>PMP (CMUP)</h3>
-        <p>Coût moyen unitaire pondéré</p>
-      </button>
-      <button class="menu-card" type="button" id="card-cout-dernier-achat">
-        <div class="icon">🧾</div>
-        <h3>Prix de dernière achat</h3>
-        <p>Dernier prix d'achat connu</p>
-      </button>
-    </div>
-  </div>
-</section>
 
-<!-- ============ COÛT — STANDARD ============ -->
-<section id="screen-cout-standard" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-hub-from-cout-standard">← Coût</button>
-      <button class="logout-btn" id="btn-logout-cout-standard">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
-    <div class="dash-head">
-      <div>
-        <h2>Coût standard</h2>
-        <p>Coût mousse + coût tissu + coût gaine + coût colle (SW, CONF, DUO), calculé à partir des caractéristiques de chaque article</p>
-      </div>
-    </div>
-    <div id="cout-standard-note" class="art-banner info" style="display:none;"></div>
     <div class="panel">
+      <div class="panel-head"><h3>État de stock</h3></div>
       <div class="table-scroll">
         <table>
           <thead>
             <tr>
-              <th>Code article</th><th>Désignation</th><th>Nature</th>
-              <th>Coût mousse (MGA)</th><th>Coût tissu (MGA)</th>
-              <th>Coût colle (MGA) *</th><th>Coût gaine (MGA) *</th>
-              <th>Coût standard total (MGA)</th>
+              <th>Code article</th><th>Intitulé article</th><th>Site</th><th>Dépôt</th>
+              <th>Quantité disponible</th><th>Prix de revient unitaire (MGA)</th><th>Valeur (MGA)</th>
             </tr>
           </thead>
-          <tbody id="cout-standard-body"></tbody>
+          <tbody id="stock-body"><tr><td colspan="7">Choisissez vos filtres puis cliquez sur « Extraire l'état de stock ».</td></tr></tbody>
         </table>
       </div>
-      <p style="padding:0 22px 18px; font-size:.82rem; color:#5a6b80;">* Colonnes calculées avec des prix et une formule de consommation simulés — à mettre à jour dès réception des vraies valeurs.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ============ COÛT — PMP (en attente du module Entrées de stock) ============ -->
-<section id="screen-cout-pmp" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-hub-from-cout-pmp">← Coût</button>
-      <button class="logout-btn" id="btn-logout-cout-pmp">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
-    <div class="empty-state">
-      <div class="big">📈</div>
-      <h2>PMP (CMUP)</h2>
-      <p>Le prix moyen pondéré se calcule à partir de l'historique des entrées de stock (quantité × prix d'achat). Cet écran s'activera dès que le module Entrées de stock sera mis en place.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ============ COÛT — DERNIER ACHAT (en attente du module Entrées de stock) ============ -->
-<section id="screen-cout-dernier-achat" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-hub-from-cout-dernier-achat">← Coût</button>
-      <button class="logout-btn" id="btn-logout-cout-dernier-achat">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
-    <div class="empty-state">
-      <div class="big">🧾</div>
-      <h2>Prix de dernière achat</h2>
-      <p>Cet écran affichera le prix du dernier achat enregistré par article dès que le module Entrées de stock sera mis en place.</p>
     </div>
   </div>
 </section>
@@ -1300,6 +1154,7 @@
         return [];
       }
       return (data || []).map(a => ({
+        id: a.id,
         code: a.code,
         intitule: a.intitule,
         categorie: a.categorie,
@@ -1326,6 +1181,11 @@
       return [];
     }
   }
+
+  // Cache en mémoire de la dernière liste chargée, pour la recherche
+  // instantanée et pour ouvrir la fiche détail sans refaire une requête.
+  let articlesCache = [];
+  let editingArticleId = null; // null = mode création, sinon id de l'article en cours d'édition
 
   // Surface mousse = longueur * largeur, convertie de cm² en m²
   // Volume mousse = longueur * largeur * hauteur, convertie de cm³ en m³
@@ -1359,7 +1219,12 @@
     document.getElementById('art-banner').style.display = 'none';
   }
 
-  function resetArticleForm(){
+  // Réinitialise le formulaire et repasse en mode "création"
+  function enterCreateMode(){
+    editingArticleId = null;
+    document.getElementById('art-form-title').textContent = 'Créateur de code article';
+    document.getElementById('art-form-subtitle').textContent = "Renseignez les caractéristiques puis créez l'article";
+    document.getElementById('art-create-btn').textContent = "Créer l'article";
     document.getElementById('art-gestion-stock-oui').checked = true;
     populateDepotSelect();
     toggleGestionStock();
@@ -1378,7 +1243,45 @@
     updateArticleCode();
   }
 
-  async function handleCreateArticle(){
+  // Pré-remplit le formulaire avec un article existant et passe en mode "édition"
+  function enterEditMode(a){
+    editingArticleId = a.id;
+    document.getElementById('art-form-title').textContent = 'Modifier l\'article ' + a.code;
+    document.getElementById('art-form-subtitle').textContent = 'Mettez à jour les caractéristiques puis enregistrez';
+    document.getElementById('art-create-btn').textContent = 'Enregistrer les modifications';
+
+    document.getElementById('art-gestion-stock-oui').checked = !!a.gestionStock;
+    document.getElementById('art-gestion-stock-non').checked = !a.gestionStock;
+    toggleGestionStock();
+    if(a.site){ document.getElementById('art-site').value = a.site; }
+    populateDepotSelect();
+    if(a.depot){ document.getElementById('art-depot').value = a.depot; }
+
+    document.getElementById('art-categorie').value = a.categorie || 'PF';
+    document.getElementById('art-societe').value = a.societe || 'VT';
+    document.getElementById('art-nature').value = a.nature || '';
+    document.getElementById('art-longueur').value = a.longueur ?? '';
+    document.getElementById('art-largeur').value = a.largeur ?? '';
+    document.getElementById('art-hauteur').value = a.hauteur ?? '';
+    document.getElementById('art-tissus').value = a.tissus || '';
+    document.getElementById('art-gaine-oui').checked = !!a.gaineOui;
+    document.getElementById('art-gaine-non').checked = !a.gaineOui;
+    document.getElementById('art-gaine-code-field').style.display = a.gaineOui ? '' : 'none';
+    document.getElementById('art-gaine-code').value = a.gaineCode || '';
+    document.getElementById('art-intitule').value = a.intitule || '';
+    updateArticleCode();
+    if(a.colleType){ document.getElementById('art-colle').value = a.colleType; }
+  }
+
+  function enterEditModeFromDetail(){
+    const a = articlesCache.find(x => x.id === currentDetailId);
+    if(!a) return;
+    enterEditMode(a);
+    hideArtBanner();
+    showScreen('article-create');
+  }
+
+  async function handleSaveArticle(){
     const gestionStock = document.getElementById('art-gestion-stock-oui').checked;
     const site = gestionStock ? document.getElementById('art-site').value : null;
     const depot = gestionStock ? document.getElementById('art-depot').value : null;
@@ -1408,39 +1311,69 @@
     const createBtn = document.getElementById('art-create-btn');
     createBtn.disabled = true;
     const originalLabel = createBtn.textContent;
-    createBtn.textContent = 'Création…';
+    createBtn.textContent = editingArticleId ? 'Enregistrement…' : 'Création…';
 
     try{
       const mousse = computeMousse(longueur, largeur, hauteur);
       const quantiteTissus = computeTissusConso(longueur, largeur, hauteur);
 
-      const { error } = await supabaseClient.from('articles').insert([{
+      const payload = {
         code, intitule, categorie, societe, nature,
         longueur: parseFloat(longueur), largeur: parseFloat(largeur), hauteur: parseFloat(hauteur),
         tissus, gaine_oui: gaineOui, gaine_code: gaineCode, colle_type: colleType,
         gestion_stock: gestionStock, site, depot,
         surface_mousse: mousse.surface, volume_mousse: mousse.volume, quantite_tissus: quantiteTissus
-      }]);
+      };
+
+      let error;
+      if(editingArticleId){
+        payload.updated_at = new Date().toISOString();
+        ({ error } = await supabaseClient.from('articles').update(payload).eq('id', editingArticleId));
+      } else {
+        ({ error } = await supabaseClient.from('articles').insert([payload]));
+      }
 
       if(error){
         if(error.code === '23505'){
           const ou = depot ? ` dans le dépôt « ${depot} »` : '';
           showArtBanner(`⚠️ Ce code article existe déjà${ou} : « ${code} ». Modifiez au moins une caractéristique, ou choisissez un autre dépôt, pour créer une ligne distincte.`, 'warning');
         } else {
-          console.error('Erreur de création article', error);
+          console.error('Erreur d\'enregistrement article', error);
           showArtBanner("Une erreur est survenue lors de l'enregistrement de l'article.", 'warning');
         }
         return;
       }
 
-      showArtBanner(`✅ Article créé avec succès : ${code}`, 'success');
-      resetArticleForm();
+      showArtBanner(editingArticleId ? `✅ Article mis à jour : ${code}` : `✅ Article créé avec succès : ${code}`, 'success');
+      enterCreateMode();
+      renderArticleList();
     }catch(e){
-      console.error('Erreur de création article', e);
+      console.error('Erreur d\'enregistrement article', e);
       showArtBanner("Une erreur est survenue lors de l'enregistrement de l'article.", 'warning');
     }finally{
       createBtn.disabled = false;
       createBtn.textContent = originalLabel;
+    }
+  }
+
+  async function handleDeleteArticle(){
+    const a = articlesCache.find(x => x.id === currentDetailId);
+    if(!a) return;
+    if(!confirm(`Supprimer définitivement l'article « ${a.code} » ? Cette action est irréversible.`)) return;
+    try{
+      const { error } = await supabaseClient.from('articles').delete().eq('id', a.id);
+      if(error){
+        console.error('Erreur de suppression article', error);
+        alert("Une erreur est survenue lors de la suppression de l'article.");
+        return;
+      }
+      showScreen('article-create');
+      hideArtBanner();
+      enterCreateMode();
+      renderArticleList();
+    }catch(e){
+      console.error('Erreur de suppression article', e);
+      alert("Une erreur est survenue lors de la suppression de l'article.");
     }
   }
 
@@ -1453,84 +1386,16 @@
     try{ return new Date(iso).toLocaleDateString('fr-FR'); }catch(e){ return '—'; }
   }
 
-  async function renderArticleList(){
-    const tbody = document.getElementById('article-list-body');
-    tbody.innerHTML = '<tr><td colspan="7">Chargement…</td></tr>';
-    const articles = await loadArticles();
-    document.getElementById('article-list-count').textContent = articles.length + ' article(s) créé(s)';
-    if(!articles.length){
-      tbody.innerHTML = '<tr><td colspan="7">Aucun article créé pour le moment.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = '';
-    articles.slice().sort((a,b)=> (b.updatedAt||'').localeCompare(a.updatedAt||'')).forEach(a=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><strong>${a.code}</strong></td>
-        <td>${a.intitule || '—'}</td>
-        <td>${a.nature || '—'}</td>
-        <td>${a.longueur}×${a.largeur}×${a.hauteur}</td>
-        <td>${a.tissus || '—'}</td>
-        <td>${a.gaineOui ? 'Oui' : 'Non'}</td>
-        <td>${fmtDate(a.createdAt)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  async function renderArticleMousse(){
-    const tbody = document.getElementById('article-mousse-body');
-    tbody.innerHTML = '<tr><td colspan="5">Chargement…</td></tr>';
-    const articles = await loadArticles();
-    if(!articles.length){
-      tbody.innerHTML = '<tr><td colspan="5">Aucun article créé pour le moment.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = '';
-    articles.forEach(a=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><strong>${a.code}</strong></td>
-        <td>${a.intitule || '—'}</td>
-        <td>${a.longueur}×${a.largeur}×${a.hauteur}</td>
-        <td>${fmtNum(a.surfaceMousse, 3)}</td>
-        <td>${fmtNum(a.volumeMousse, 4)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  async function renderArticleTissus(){
-    const tbody = document.getElementById('article-tissus-body');
-    tbody.innerHTML = '<tr><td colspan="5">Chargement…</td></tr>';
-    const articles = await loadArticles();
-    if(!articles.length){
-      tbody.innerHTML = '<tr><td colspan="5">Aucun article créé pour le moment.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = '';
-    articles.forEach(a=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><strong>${a.code}</strong></td>
-        <td>${a.intitule || '—'}</td>
-        <td>${a.tissus || '—'}</td>
-        <td>${a.longueur}×${a.largeur}×${a.hauteur}</td>
-        <td>${fmtNum(a.quantiteTissus, 3)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
   function fmtMga(n){
-    return (typeof n === 'number' && !isNaN(n)) ? Math.round(n).toLocaleString('fr-FR') : '—';
+    return (typeof n === 'number' && !isNaN(n)) ? Math.round(n).toLocaleString('fr-FR') + ' MGA' : '—';
   }
 
-  // Coût standard = coût mousse + coût tissu + coût colle (SW/CONF/DUO) + coût gaine.
-  // ⚠️ Coût colle et coût gaine reposent sur des PRU et des formules de
-  // consommation SIMULÉS (voir COLLE_COST_SIMULE, TAUX_COLLE_SIMULE,
-  // PRU_GAINE_SIMULE) — à remplacer dès que les vraies valeurs seront
-  // communiquées.
+  // Coût standard = (coût unitaire mousse × volume article)
+  //               + (coût unitaire tissus × conso tissus)
+  //               + (coût unitaire gaine × volume article, si gaine)
+  // ⚠️ Le coût unitaire gaine est SIMULÉ (PRU_GAINE_SIMULE) en attendant
+  // la vraie valeur. La colle n'entre plus dans le total (formule donnée
+  // par l'utilisateur), elle reste enregistrée sur l'article pour info.
   function computeCoutStandard(a){
     const pruMousse = MOUSSE_COST[a.nature];
     const coutMousse = (typeof pruMousse === 'number') ? pruMousse * (a.volumeMousse || 0) : null;
@@ -1538,54 +1403,240 @@
     const pruTissu = TISSU_COST[a.tissus];
     const coutTissu = (typeof pruTissu === 'number') ? pruTissu * (a.quantiteTissus || 0) : null;
 
-    let coutColle = 0;
-    if(natureUtiliseColle(a.nature)){
-      const pruColle = COLLE_COST_SIMULE[a.colleType] || COLLE_COST_SIMULE['EVERAD'];
-      const qteColle = (a.surfaceMousse || 0) * TAUX_COLLE_SIMULE;
-      coutColle = pruColle * qteColle;
-    }
+    const coutGaine = a.gaineOui ? PRU_GAINE_SIMULE * (a.volumeMousse || 0) : 0;
 
-    const coutGaine = a.gaineOui ? PRU_GAINE_SIMULE * (a.quantiteTissus || 0) : 0;
-
-    const parts = [coutMousse, coutTissu, coutColle, coutGaine];
+    const parts = [coutMousse, coutTissu, coutGaine];
     const total = parts.every(p => typeof p === 'number') ? parts.reduce((s,p)=>s+p, 0) : null;
 
-    return { coutMousse, coutTissu, coutColle, coutGaine, total };
+    return { coutMousse, coutTissu, coutGaine, total };
   }
 
-  async function renderCoutStandard(){
-    const tbody = document.getElementById('cout-standard-body');
-    const note = document.getElementById('cout-standard-note');
-    tbody.innerHTML = '<tr><td colspan="8">Chargement…</td></tr>';
-    const articles = await loadArticles();
-    if(!articles.length){
-      tbody.innerHTML = '<tr><td colspan="8">Aucun article créé pour le moment.</td></tr>';
-      note.style.display = 'none';
+  // ---------- Liste / recherche / CRUD ----------
+  function articleMatchesSearch(a, q){
+    if(!q) return true;
+    const needle = q.trim().toLowerCase();
+    if(!needle) return true;
+    return [a.code, a.nature, a.intitule, a.tissus, a.site, a.depot]
+      .some(v => (v || '').toString().toLowerCase().includes(needle));
+  }
+
+  async function renderArticleList(searchTerm){
+    const tbody = document.getElementById('article-list-body');
+    tbody.innerHTML = '<tr><td colspan="4">Chargement…</td></tr>';
+    articlesCache = await loadArticles();
+    const q = (typeof searchTerm === 'string') ? searchTerm : document.getElementById('art-search').value;
+    const filtered = articlesCache.filter(a => articleMatchesSearch(a, q));
+
+    document.getElementById('article-list-count').textContent =
+      `${filtered.length} / ${articlesCache.length} article(s)` + (q ? ` — recherche : « ${q} »` : '');
+
+    if(!filtered.length){
+      tbody.innerHTML = '<tr><td colspan="4">Aucun article ne correspond.</td></tr>';
       return;
     }
-    if(PRIX_SIMULES){
-      note.textContent = "⚠️ Le coût colle et le coût gaine utilisent des prix (PRU) et une formule de consommation SIMULÉS, en attendant les vraies valeurs. Ne pas utiliser ces deux colonnes pour des décisions réelles.";
-      note.style.display = 'block';
-    } else {
-      note.style.display = 'none';
-    }
     tbody.innerHTML = '';
-    articles.forEach(a=>{
-      const c = computeCoutStandard(a);
+    filtered.forEach(a=>{
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><strong>${a.code}</strong></td>
+        <td><button type="button" class="code-link" data-id="${a.id}">${a.code}</button></td>
         <td>${a.intitule || '—'}</td>
         <td>${a.nature || '—'}</td>
-        <td>${fmtMga(c.coutMousse)}</td>
-        <td>${fmtMga(c.coutTissu)}</td>
-        <td>${c.coutColle ? fmtMga(c.coutColle) + ' *' : '—'}</td>
-        <td>${c.coutGaine ? fmtMga(c.coutGaine) + ' *' : '—'}</td>
-        <td><strong>${fmtMga(c.total)}</strong></td>
+        <td>
+          <div class="row-actions">
+            <button type="button" data-action="view" data-id="${a.id}">Voir</button>
+            <button type="button" data-action="edit" data-id="${a.id}">Modifier</button>
+            <button type="button" class="danger" data-action="delete" data-id="${a.id}">Suppr.</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('.code-link, [data-action="view"]').forEach(btn=>{
+      btn.addEventListener('click', () => openArticleDetail(btn.dataset.id));
+    });
+    tbody.querySelectorAll('[data-action="edit"]').forEach(btn=>{
+      btn.addEventListener('click', () => {
+        const a = articlesCache.find(x => x.id === btn.dataset.id);
+        if(a){ enterEditMode(a); hideArtBanner(); showScreen('article-create'); }
+      });
+    });
+    tbody.querySelectorAll('[data-action="delete"]').forEach(btn=>{
+      btn.addEventListener('click', async () => {
+        const a = articlesCache.find(x => x.id === btn.dataset.id);
+        if(!a) return;
+        if(!confirm(`Supprimer définitivement l'article « ${a.code} » ? Cette action est irréversible.`)) return;
+        const { error } = await supabaseClient.from('articles').delete().eq('id', a.id);
+        if(error){ alert("Une erreur est survenue lors de la suppression de l'article."); return; }
+        renderArticleList();
+      });
+    });
+  }
+
+  // ---------- Fiche détail article (caractéristiques + mousse/tissus + coût + stock) ----------
+  let currentDetailId = null;
+
+  function openArticleDetail(id){
+    currentDetailId = id;
+    const a = articlesCache.find(x => x.id === id);
+    if(!a){ showScreen('article-create'); return; }
+
+    document.getElementById('detail-code').textContent = a.code;
+    document.getElementById('detail-intitule').textContent = a.intitule || 'Fiche article';
+
+    document.getElementById('detail-carac-grid').innerHTML = `
+      <div class="info-box"><div class="label">Catégorie</div><div class="value">${a.categorie || '—'}</div></div>
+      <div class="info-box"><div class="label">Société</div><div class="value">${a.societe || '—'}</div></div>
+      <div class="info-box"><div class="label">Nature</div><div class="value">${a.nature || '—'}</div></div>
+      <div class="info-box"><div class="label">Dimensions (cm)</div><div class="value">${a.longueur}×${a.largeur}×${a.hauteur}</div></div>
+      <div class="info-box"><div class="label">Tissus</div><div class="value">${a.tissus || '—'}</div></div>
+      <div class="info-box"><div class="label">Gaine</div><div class="value">${a.gaineOui ? 'Oui' : 'Non'}</div><div class="sub">${a.gaineOui ? (a.gaineCode || '') : ''}</div></div>
+      <div class="info-box"><div class="label">Colle</div><div class="value">${a.colleType || '—'}</div></div>
+      <div class="info-box"><div class="label">Gestion stock</div><div class="value">${a.gestionStock ? 'Géré en stock' : 'Non géré'}</div></div>
+      <div class="info-box"><div class="label">Article site</div><div class="value">${a.site || '—'}</div></div>
+      <div class="info-box"><div class="label">Dépôt</div><div class="value">${a.depot || '—'}</div></div>
+      <div class="info-box"><div class="label">Créé le</div><div class="value" style="font-size:1rem;">${fmtDate(a.createdAt)}</div></div>
+    `;
+
+    document.getElementById('detail-mousse-tissus-grid').innerHTML = `
+      <div class="info-box"><div class="label">Surface mousse</div><div class="value">${fmtNum(a.surfaceMousse,3)} m²</div></div>
+      <div class="info-box"><div class="label">Volume mousse (= volume article)</div><div class="value">${fmtNum(a.volumeMousse,4)} m³</div></div>
+      <div class="info-box"><div class="label">Conso. tissus</div><div class="value">${fmtNum(a.quantiteTissus,3)} m²</div></div>
+    `;
+
+    const c = computeCoutStandard(a);
+    document.getElementById('detail-cout-grid').innerHTML = `
+      <div class="info-box"><div class="label">Coût standard</div><div class="value">${fmtMga(c.total)}</div>
+        <div class="sub">Mousse ${fmtMga(c.coutMousse)} + Tissu ${fmtMga(c.coutTissu)}${a.gaineOui ? ' + Gaine ' + fmtMga(c.coutGaine) : ''}</div></div>
+      <div class="info-box"><div class="label">PMP (CMUP)</div><div class="value" style="font-size:.95rem;">En attente</div><div class="sub">Nécessite l'historique des entrées de stock</div></div>
+      <div class="info-box"><div class="label">Prix de dernière achat</div><div class="value" style="font-size:.95rem;">En attente</div><div class="sub">Nécessite l'historique des achats</div></div>
+    `;
+    document.getElementById('detail-cout-note').textContent = a.gaineOui
+      ? "⚠️ Le coût gaine utilise un prix unitaire (PRU) SIMULÉ, en attendant la vraie valeur."
+      : '';
+
+    document.getElementById('detail-stock-grid').innerHTML = `
+      <div class="info-box"><div class="label">Quantité disponible</div><div class="value">${a.gestionStock ? '0' : '—'}</div>
+        <div class="sub">${a.gestionStock ? (a.site || '') + ' / ' + (a.depot || '') : 'Article non géré en stock'}</div></div>
+    `;
+
+    showScreen('article-detail');
+  }
+
+  // ---------- Export CSV ----------
+  function downloadCsv(filename, rows){
+    const csv = rows.map(r => r.map(v => {
+      const s = (v === null || v === undefined) ? '' : String(v);
+      return /[;"\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+    }).join(';')).join('\r\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  async function exportArticlesCsv(){
+    const articles = await loadArticles();
+    const header = ['Code','Intitulé','Catégorie','Société','Nature','Longueur','Largeur','Hauteur',
+      'Tissus','Gaine','Code gaine','Colle','Gestion stock','Article site','Dépôt',
+      'Surface mousse (m²)','Volume mousse (m³)','Conso tissus (m²)',
+      'Coût mousse (MGA)','Coût tissu (MGA)','Coût gaine (MGA)','Coût standard total (MGA)','Créé le'];
+    const rows = [header];
+    articles.forEach(a=>{
+      const c = computeCoutStandard(a);
+      rows.push([
+        a.code, a.intitule, a.categorie, a.societe, a.nature, a.longueur, a.largeur, a.hauteur,
+        a.tissus, a.gaineOui ? 'Oui' : 'Non', a.gaineCode, a.colleType,
+        a.gestionStock ? 'Géré en stock' : 'Non géré', a.site, a.depot,
+        fmtNum(a.surfaceMousse,3), fmtNum(a.volumeMousse,4), fmtNum(a.quantiteTissus,3),
+        Math.round(c.coutMousse||0), Math.round(c.coutTissu||0), Math.round(c.coutGaine||0), Math.round(c.total||0),
+        fmtDate(a.createdAt)
+      ]);
+    });
+    downloadCsv('articles_vitafoam.csv', rows);
+  }
+
+  // ---------- Stock : filtres, extraction, export ----------
+  function populateStockFilters(){
+    const siteEl = document.getElementById('stock-site');
+    siteEl.innerHTML = '<option value="">Tous</option>' + SITES.map(s => `<option value="${s.code}">${s.label}</option>`).join('');
+    siteEl.addEventListener('change', () => populateStockDepotFilter());
+    populateStockDepotFilter();
+  }
+
+  function populateStockDepotFilter(){
+    const site = document.getElementById('stock-site').value;
+    const depots = site ? (DEPOTS_BY_SITE[site] || []) : Object.values(DEPOTS_BY_SITE).flat();
+    const depotEl = document.getElementById('stock-depot');
+    depotEl.innerHTML = '<option value="">Tous</option>' + depots.map(d => `<option value="${d.code}">${d.label} (${d.code})</option>`).join('');
+  }
+
+  let lastStockResults = [];
+
+  async function renderStockExtraction(){
+    const tbody = document.getElementById('stock-body');
+    tbody.innerHTML = '<tr><td colspan="7">Chargement…</td></tr>';
+
+    const societe = document.getElementById('stock-societe').value;
+    const site = document.getElementById('stock-site').value;
+    const depot = document.getElementById('stock-depot').value;
+    // Le mois n'est pas encore exploitable (aucun mouvement de stock daté
+    // n'existe) — il est conservé pour filtrer l'historique dès que le
+    // module Entrées/Sorties sera en place.
+
+    const articles = await loadArticles();
+    const filtered = articles.filter(a =>
+      (!societe || a.societe === societe) &&
+      (!site || a.site === site) &&
+      (!depot || a.depot === depot) &&
+      a.gestionStock
+    );
+
+    lastStockResults = filtered.map(a => {
+      const c = computeCoutStandard(a);
+      return {
+        code: a.code, intitule: a.intitule, site: a.site, depot: a.depot,
+        quantite: 0, pru: c.total, valeur: 0
+      };
+    });
+
+    if(!lastStockResults.length){
+      tbody.innerHTML = '<tr><td colspan="7">Aucun article géré en stock pour ces filtres.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    lastStockResults.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${r.code}</strong></td>
+        <td>${r.intitule || '—'}</td>
+        <td>${r.site || '—'}</td>
+        <td>${r.depot || '—'}</td>
+        <td>${r.quantite}</td>
+        <td>${fmtMga(r.pru)}</td>
+        <td>${fmtMga(r.valeur)}</td>
       `;
       tbody.appendChild(tr);
     });
   }
+
+  function exportStockCsv(){
+    if(!lastStockResults.length){
+      alert("Lancez d'abord une extraction avant d'exporter.");
+      return;
+    }
+    const header = ['Code','Intitulé article','Site','Dépôt','Quantité disponible','Prix de revient unitaire (MGA)','Valeur (MGA)'];
+    const rows = [header].concat(lastStockResults.map(r => [
+      r.code, r.intitule, r.site, r.depot, r.quantite, Math.round(r.pru||0), Math.round(r.valeur||0)
+    ]));
+    downloadCsv('etat_stock_vitafoam.csv', rows);
+  }
+
 
   // ---------- Wire everything up once the DOM is ready ----------
   document.addEventListener('DOMContentLoaded', function(){
@@ -1617,9 +1668,8 @@
     document.getElementById('btn-ytd').addEventListener('click', () => setPeriod('ytd'));
 
     // Post-login menu cards
-    document.getElementById('card-article').addEventListener('click', () => showScreen('article-menu'));
+    document.getElementById('card-article').addEventListener('click', () => { hideArtBanner(); enterCreateMode(); showScreen('article-create'); renderArticleList(); });
     document.getElementById('card-stock').addEventListener('click', () => showScreen('stock'));
-    document.getElementById('card-cout').addEventListener('click', () => showScreen('cout-menu'));
     document.getElementById('card-production').addEventListener('click', () => { renderDashboard(); showScreen('dash'); });
     document.getElementById('card-budget').addEventListener('click', () => showScreen('budget'));
 
@@ -1631,43 +1681,17 @@
     document.getElementById('btn-menu-from-budget').addEventListener('click', () => showScreen('menu'));
     document.getElementById('btn-logout-budget').addEventListener('click', () => showScreen('home'));
 
-    // Stock hub
-    document.getElementById('card-stock-dispo').addEventListener('click', () => showScreen('stock-dispo'));
-    document.getElementById('card-stock-valorise').addEventListener('click', () => showScreen('stock-valorise'));
-    document.getElementById('btn-hub-from-stock-dispo').addEventListener('click', () => showScreen('stock'));
-    document.getElementById('btn-logout-stock-dispo').addEventListener('click', () => showScreen('home'));
-    document.getElementById('btn-hub-from-stock-valorise').addEventListener('click', () => showScreen('stock'));
-    document.getElementById('btn-logout-stock-valorise').addEventListener('click', () => showScreen('home'));
-
-    // Coût hub
-    document.getElementById('btn-menu-from-cout-menu').addEventListener('click', () => showScreen('menu'));
-    document.getElementById('btn-logout-cout-menu').addEventListener('click', () => showScreen('home'));
-    document.getElementById('card-cout-standard').addEventListener('click', () => { showScreen('cout-standard'); renderCoutStandard(); });
-    document.getElementById('card-cout-pmp').addEventListener('click', () => showScreen('cout-pmp'));
-    document.getElementById('card-cout-dernier-achat').addEventListener('click', () => showScreen('cout-dernier-achat'));
-    document.getElementById('btn-hub-from-cout-standard').addEventListener('click', () => showScreen('cout-menu'));
-    document.getElementById('btn-logout-cout-standard').addEventListener('click', () => showScreen('home'));
-    document.getElementById('btn-hub-from-cout-pmp').addEventListener('click', () => showScreen('cout-menu'));
-    document.getElementById('btn-logout-cout-pmp').addEventListener('click', () => showScreen('home'));
-    document.getElementById('btn-hub-from-cout-dernier-achat').addEventListener('click', () => showScreen('cout-menu'));
-    document.getElementById('btn-logout-cout-dernier-achat').addEventListener('click', () => showScreen('home'));
-
-    // Article hub
-    document.getElementById('card-article-create').addEventListener('click', () => { hideArtBanner(); updateArticleCode(); showScreen('article-create'); });
-    document.getElementById('card-article-list').addEventListener('click', () => { showScreen('article-list'); renderArticleList(); });
-    document.getElementById('card-article-mousse').addEventListener('click', () => { showScreen('article-mousse'); renderArticleMousse(); });
-    document.getElementById('card-article-tissus').addEventListener('click', () => { showScreen('article-tissus'); renderArticleTissus(); });
-    document.getElementById('btn-menu-from-article-menu').addEventListener('click', () => showScreen('menu'));
-    document.getElementById('btn-logout-article-menu').addEventListener('click', () => showScreen('home'));
-
-    document.getElementById('btn-hub-from-article-create').addEventListener('click', () => showScreen('article-menu'));
+    // Article — créateur + liste/recherche
+    document.getElementById('btn-menu-from-article-create').addEventListener('click', () => showScreen('menu'));
     document.getElementById('btn-logout-article-create').addEventListener('click', () => showScreen('home'));
-    document.getElementById('btn-hub-from-article-list').addEventListener('click', () => showScreen('article-menu'));
-    document.getElementById('btn-logout-article-list').addEventListener('click', () => showScreen('home'));
-    document.getElementById('btn-hub-from-article-mousse').addEventListener('click', () => showScreen('article-menu'));
-    document.getElementById('btn-logout-article-mousse').addEventListener('click', () => showScreen('home'));
-    document.getElementById('btn-hub-from-article-tissus').addEventListener('click', () => showScreen('article-menu'));
-    document.getElementById('btn-logout-article-tissus').addEventListener('click', () => showScreen('home'));
+    document.getElementById('art-search').addEventListener('input', (e) => renderArticleList(e.target.value));
+    document.getElementById('btn-export-articles').addEventListener('click', exportArticlesCsv);
+
+    // Article — détail
+    document.getElementById('btn-list-from-article-detail').addEventListener('click', () => { showScreen('article-create'); renderArticleList(); });
+    document.getElementById('btn-logout-article-detail').addEventListener('click', () => showScreen('home'));
+    document.getElementById('btn-detail-edit').addEventListener('click', enterEditModeFromDetail);
+    document.getElementById('btn-detail-delete').addEventListener('click', handleDeleteArticle);
 
     // Article creator
     populateSelect('art-nature', NATURE_LIST);
@@ -1687,11 +1711,16 @@
     document.getElementById('art-gaine-oui').addEventListener('change', toggleGaineField);
     document.getElementById('art-gaine-non').addEventListener('change', toggleGaineField);
     document.getElementById('art-cancel-btn').addEventListener('click', () => {
-      resetArticleForm();
+      enterCreateMode();
       hideArtBanner();
-      showScreen('article-menu');
+      renderArticleList();
     });
-    document.getElementById('art-create-btn').addEventListener('click', handleCreateArticle);
+    document.getElementById('art-create-btn').addEventListener('click', handleSaveArticle);
+
+    // Stock — extraction
+    populateStockFilters();
+    document.getElementById('stock-extraire-btn').addEventListener('click', renderStockExtraction);
+    document.getElementById('stock-export-btn').addEventListener('click', exportStockCsv);
   });
 </script>
 </body>
