@@ -770,8 +770,8 @@
             </select>
           </div>
           <div class="field">
-            <label for="stock-mois">Mois</label>
-            <input type="month" id="stock-mois">
+            <label for="stock-date-ref">Date de référence</label>
+            <input type="date" id="stock-date-ref">
           </div>
         </div>
         <div class="form-actions" style="justify-content:flex-start;">
@@ -788,10 +788,10 @@
           <thead>
             <tr>
               <th>Code article</th><th>Intitulé article</th><th>Site</th><th>Dépôt</th>
-              <th>Quantité disponible</th><th>Prix de revient unitaire (MGA)</th><th>Valeur (MGA)</th>
+              <th>Date de référence</th><th>Quantité disponible</th><th>Prix de revient unitaire (MGA)</th><th>Valeur (MGA)</th>
             </tr>
           </thead>
-          <tbody id="stock-body"><tr><td colspan="7">Choisissez vos filtres puis cliquez sur « Extraire l'état de stock ».</td></tr></tbody>
+          <tbody id="stock-body"><tr><td colspan="8">Choisissez vos filtres puis cliquez sur « Extraire l'état de stock ».</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -1578,16 +1578,22 @@
 
   let lastStockResults = [];
 
+  function formatDateFr(isoDate){
+    const [y,m,d] = isoDate.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
   async function renderStockExtraction(){
     const tbody = document.getElementById('stock-body');
-    tbody.innerHTML = '<tr><td colspan="7">Chargement…</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8">Chargement…</td></tr>';
 
     const societe = document.getElementById('stock-societe').value;
     const site = document.getElementById('stock-site').value;
     const depot = document.getElementById('stock-depot').value;
-    // Le mois n'est pas encore exploitable (aucun mouvement de stock daté
-    // n'existe) — il est conservé pour filtrer l'historique dès que le
-    // module Entrées/Sorties sera en place.
+    const dateRef = document.getElementById('stock-date-ref').value;
+    // La date de référence fixe le jour d'arrêté du stock (aucun mouvement de
+    // stock daté n'existe encore) — elle est conservée pour filtrer
+    // l'historique dès que le module Entrées/Sorties sera en place.
 
     const articles = await loadArticles();
     const filtered = articles.filter(a =>
@@ -1601,12 +1607,12 @@
       const c = computeCoutStandard(a);
       return {
         code: a.code, intitule: a.intitule, site: a.site, depot: a.depot,
-        quantite: 0, pru: c.total, valeur: 0
+        dateRef, quantite: 0, pru: c.total, valeur: 0
       };
     });
 
     if(!lastStockResults.length){
-      tbody.innerHTML = '<tr><td colspan="7">Aucun article géré en stock pour ces filtres.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8">Aucun article géré en stock pour ces filtres.</td></tr>';
       return;
     }
     tbody.innerHTML = '';
@@ -1617,6 +1623,7 @@
         <td>${r.intitule || '—'}</td>
         <td>${r.site || '—'}</td>
         <td>${r.depot || '—'}</td>
+        <td>${r.dateRef ? formatDateFr(r.dateRef) : '—'}</td>
         <td>${r.quantite}</td>
         <td>${fmtMga(r.pru)}</td>
         <td>${fmtMga(r.valeur)}</td>
@@ -1630,9 +1637,9 @@
       alert("Lancez d'abord une extraction avant d'exporter.");
       return;
     }
-    const header = ['Code','Intitulé article','Site','Dépôt','Quantité disponible','Prix de revient unitaire (MGA)','Valeur (MGA)'];
+    const header = ['Code','Intitulé article','Site','Dépôt','Date de référence','Quantité disponible','Prix de revient unitaire (MGA)','Valeur (MGA)'];
     const rows = [header].concat(lastStockResults.map(r => [
-      r.code, r.intitule, r.site, r.depot, r.quantite, Math.round(r.pru||0), Math.round(r.valeur||0)
+      r.code, r.intitule, r.site, r.depot, r.dateRef ? formatDateFr(r.dateRef) : '', r.quantite, Math.round(r.pru||0), Math.round(r.valeur||0)
     ]));
     downloadCsv('etat_stock_vitafoam.csv', rows);
   }
@@ -1719,6 +1726,10 @@
 
     // Stock — extraction
     populateStockFilters();
+    const dateRefEl = document.getElementById('stock-date-ref');
+    if (dateRefEl && !dateRefEl.value) {
+      dateRefEl.value = new Date().toISOString().slice(0,10);
+    }
     document.getElementById('stock-extraire-btn').addEventListener('click', renderStockExtraction);
     document.getElementById('stock-export-btn').addEventListener('click', exportStockCsv);
   });
