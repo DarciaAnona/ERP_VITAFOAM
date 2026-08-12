@@ -584,20 +584,16 @@
           </div>
         </div>
 
-        <div class="panel" id="art-site-depot-panel" style="margin-bottom:20px;">
-          <div class="panel-head"><h3>Article site &amp; dépôt</h3></div>
+        <div class="panel" id="art-site-panel" style="margin-bottom:20px;">
+          <div class="panel-head"><h3>Article site</h3></div>
           <div style="padding:22px;">
             <div class="form-grid">
               <div class="field">
                 <label for="art-site">Article site</label>
                 <select id="art-site"></select>
               </div>
-              <div class="field">
-                <label for="art-depot">Dépôt</label>
-                <select id="art-depot"></select>
-              </div>
             </div>
-            <p style="font-size:.85rem; color:#5a6b80; margin-top:4px;">Un même code article peut être géré dans plusieurs dépôts : c'est le dépôt choisi ici qui différencie chaque ligne de stock.</p>
+            <p style="font-size:.85rem; color:#5a6b80; margin-top:4px;">Un article peut être rattaché à plusieurs sites : choisissez un site puis cliquez sur « Créer » pour l'ajouter à un article existant (même code). Le dépôt et les quantités ne se saisissent pas ici : ils dépendront des mouvements de stock (entrée / sortie, transfert, réception) à venir.</p>
           </div>
         </div>
 
@@ -623,40 +619,46 @@
                   <option value="VS">VS</option>
                 </select>
               </div>
-              <div class="field">
-                <label for="art-nature">Nature</label>
-                <select id="art-nature"></select>
-              </div>
-              <div class="field">
-                <label for="art-longueur">Longueur (cm)</label>
-                <input type="number" id="art-longueur" placeholder="ex : 190">
-              </div>
-              <div class="field">
-                <label for="art-largeur">Largeur (cm)</label>
-                <input type="number" id="art-largeur" placeholder="ex : 140">
-              </div>
-              <div class="field">
-                <label for="art-hauteur">Hauteur (cm)</label>
-                <input type="number" id="art-hauteur" placeholder="ex : 14">
-              </div>
-              <div class="field">
-                <label for="art-tissus">Tissus</label>
-                <select id="art-tissus"></select>
-              </div>
-              <div class="field">
-                <label>Gaine</label>
-                <div class="radio-row">
-                  <label><input type="radio" name="art-gaine" id="art-gaine-non" value="non" checked> Non</label>
-                  <label><input type="radio" name="art-gaine" id="art-gaine-oui" value="oui"> Oui</label>
+              <div id="art-detailed-fields" style="display:contents;">
+                <div class="field">
+                  <label for="art-nature">Nature</label>
+                  <select id="art-nature"></select>
+                </div>
+                <div class="field">
+                  <label for="art-longueur">Longueur (cm)</label>
+                  <input type="number" id="art-longueur" placeholder="ex : 190">
+                </div>
+                <div class="field">
+                  <label for="art-largeur">Largeur (cm)</label>
+                  <input type="number" id="art-largeur" placeholder="ex : 140">
+                </div>
+                <div class="field">
+                  <label for="art-hauteur">Hauteur (cm)</label>
+                  <input type="number" id="art-hauteur" placeholder="ex : 14">
+                </div>
+                <div class="field">
+                  <label for="art-tissus">Tissus</label>
+                  <select id="art-tissus"></select>
+                </div>
+                <div class="field">
+                  <label>Gaine</label>
+                  <div class="radio-row">
+                    <label><input type="radio" name="art-gaine" id="art-gaine-non" value="non" checked> Non</label>
+                    <label><input type="radio" name="art-gaine" id="art-gaine-oui" value="oui"> Oui</label>
+                  </div>
+                </div>
+                <div class="field" id="art-gaine-code-field" style="display:none;">
+                  <label for="art-gaine-code">Code gaine</label>
+                  <input type="text" id="art-gaine-code" placeholder="Saisir le code gaine (usage interne)">
+                </div>
+                <div class="field" id="art-colle-field" style="display:none;">
+                  <label for="art-colle">Type de colle</label>
+                  <select id="art-colle"></select>
                 </div>
               </div>
-              <div class="field" id="art-gaine-code-field" style="display:none;">
-                <label for="art-gaine-code">Code gaine</label>
-                <input type="text" id="art-gaine-code" placeholder="Saisir le code gaine (usage interne)">
-              </div>
-              <div class="field" id="art-colle-field" style="display:none;">
-                <label for="art-colle">Type de colle</label>
-                <select id="art-colle"></select>
+              <div class="field" id="art-manual-code-field" style="display:none; grid-column:1 / -1;">
+                <label for="art-manual-code">Code article (saisie manuelle)</label>
+                <input type="text" id="art-manual-code" placeholder="Saisir le code article">
               </div>
               <div class="field" style="grid-column:1 / -1;">
                 <label for="art-intitule">Intitulé article (saisie manuelle)</label>
@@ -772,12 +774,6 @@
             </select>
           </div>
           <div class="field">
-            <label for="stock-depot">Dépôt</label>
-            <select id="stock-depot">
-              <option value="">Tous</option>
-            </select>
-          </div>
-          <div class="field">
             <label for="stock-date-ref">Date de référence</label>
             <input type="date" id="stock-date-ref">
           </div>
@@ -795,11 +791,11 @@
         <table>
           <thead>
             <tr>
-              <th>Code article</th><th>Intitulé article</th><th>Site</th><th>Dépôt</th>
+              <th>Code article</th><th>Intitulé article</th><th>Article site(s)</th>
               <th>Date de référence</th><th>Quantité disponible</th><th>Prix de revient unitaire (MGA)</th><th>Valeur (MGA)</th>
             </tr>
           </thead>
-          <tbody id="stock-body"><tr><td colspan="8">Choisissez vos filtres puis cliquez sur « Extraire l'état de stock ».</td></tr></tbody>
+          <tbody id="stock-body"><tr><td colspan="7">Choisissez vos filtres puis cliquez sur « Extraire l'état de stock ».</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -1010,58 +1006,15 @@
     '110','111','112','113','114','116','103AF','104AF','ALX','BMB','HYB','ALV'
   ];
 
-  // ---------- Sites & dépôts ----------
+  // ---------- Sites (abréviations uniquement) ----------
+  // Un article peut être rattaché à plusieurs sites (voir "sites" en base).
+  // Le dépôt et les quantités ne sont plus saisis ici : ils dépendront des
+  // mouvements de stock (entrée / sortie, transfert, réception) à venir.
   const SITES = [
-    { code: 'VITA', label: 'Vitafoam Tana' },
-    { code: 'VIDIE', label: 'Vitafoam Diego' },
-    { code: 'VISA', label: 'Vitafoam Sambava' }
+    { code: 'VITA' },
+    { code: 'VIDIE' },
+    { code: 'VISA' }
   ];
-
-  // Libellés non fournis pour VIDIE / VISA déduits par symétrie avec les
-  // dépôts VITA (mêmes préfixes MP/PROD/DBT/CFC/GROS/SR) — à valider.
-  const DEPOTS_BY_SITE = {
-    VITA: [
-      { code: 'MP-TANA', label: 'MP TANA' },
-      { code: 'PROD-TANA', label: 'PROD TANA' },
-      { code: 'GROS-TANA', label: 'GROS TANA' },
-      { code: 'SR-TANA', label: 'SHOWROOM TANA' },
-      { code: 'DBT-TANA', label: 'DEBITAGE TANA' },
-      { code: 'CFC-TANA', label: 'CONFECTION TANA' },
-      { code: 'APT', label: 'DEPOT GROS AMPITATAFIKA' },
-      { code: 'ANZ', label: 'DEPOT GROS ANOSIZATO' },
-      { code: 'ADF', label: 'DEPOT GROS ANDOHARANOFOTSY' },
-      { code: 'TLM', label: 'DEPOT GROS TALATAMATY' },
-      { code: 'FD', label: 'DEPOT GROS FORT-DAUPHIN' },
-      { code: 'FRT', label: 'DEPOT GROS FIANARANTSOA' },
-      { code: 'TLR', label: 'DEPOT GROS TOLIARA' },
-      { code: 'MDV', label: 'DEPOT GROS MORONDAVA' },
-      { code: 'TVE1', label: 'DEPOT GROS TAMATAVE 1' },
-      { code: 'TVE2', label: 'DEPOT GROS TAMATAVE 2' },
-      { code: 'ATB', label: 'DEPOT GROS ANTSIRABE' },
-      { code: 'MRG', label: 'DEPOT GROS MORAMANGA' }
-    ],
-    VIDIE: [
-      { code: 'MP-DG', label: 'MP DIEGO' },
-      { code: 'PROD-DG', label: 'PROD DIEGO' },
-      { code: 'DBT-DG', label: 'DEBITAGE DIEGO' },
-      { code: 'CFC-DG', label: 'CONFECTION DIEGO' },
-      { code: 'GROS-DG', label: 'GROS DIEGO' },
-      { code: 'SR-DG', label: 'SHOWROOM DIEGO' },
-      { code: 'ATH', label: 'DEPOT GROS ANTSOHIHY' },
-      { code: 'ABJ', label: 'DEPOT GROS AMBANJA' },
-      { code: 'NSB1', label: 'DEPOT GROS NOSY BE 1' },
-      { code: 'NSB2', label: 'DEPOT GROS NOSY BE 2' },
-      { code: 'NSB3', label: 'DEPOT GROS NOSY BE 3' }
-    ],
-    VISA: [
-      { code: 'MP-SB', label: 'MP SAMBAVA' },
-      { code: 'PROD-SB', label: 'PROD SAMBAVA' },
-      { code: 'DBT-SB', label: 'DEBITAGE SAMBAVA' },
-      { code: 'CFC-SB', label: 'CONFECTION SAMBAVA' },
-      { code: 'GROS-SB', label: 'GROS SAMBAVA' },
-      { code: 'SR-SB', label: 'SHOWROOM SAMBAVA' }
-    ]
-  };
 
   // ---------- Tables de coût (PRU) ----------
   // Mousse : prix unitaire au m³, par nature de mousse
@@ -1115,21 +1068,44 @@
     return code;
   }
 
+  // Seules les catégories PF (produit fini) et PSF (produit semi fini) ont
+  // des caractéristiques détaillées (nature, dimensions, tissus, gaine,
+  // colle) et un code généré automatiquement. Les autres catégories
+  // (MP, NEG, DIVERS) n'ont qu'un code article saisi manuellement.
+  function categorieUtiliseCaracteristiques(cat){
+    return cat === 'PF' || cat === 'PSF';
+  }
+
+  function toggleCategoryFields(){
+    const cat = document.getElementById('art-categorie').value;
+    const detailed = categorieUtiliseCaracteristiques(cat);
+    document.getElementById('art-detailed-fields').style.display = detailed ? 'contents' : 'none';
+    document.getElementById('art-manual-code-field').style.display = detailed ? 'none' : '';
+    updateArticleCode();
+  }
+
   function updateArticleCode(){
-    const nature = document.getElementById('art-nature').value;
-    const longueur = document.getElementById('art-longueur').value.trim();
-    const largeur = document.getElementById('art-largeur').value.trim();
-    const hauteur = document.getElementById('art-hauteur').value.trim();
-    const tissus = document.getElementById('art-tissus').value;
-    const gaineOui = document.getElementById('art-gaine-oui').checked;
-    // Le code gaine est saisi manuellement pour info interne uniquement :
-    // il n'entre jamais dans le code article généré. Seul "-SG" est ajouté
-    // automatiquement si "Oui" est coché.
+    const cat = document.getElementById('art-categorie').value;
+    const detailed = categorieUtiliseCaracteristiques(cat);
     const intitule = document.getElementById('art-intitule').value.trim();
+    let code;
 
-    document.getElementById('art-colle-field').style.display = natureUtiliseColle(nature) ? '' : 'none';
+    if(detailed){
+      const nature = document.getElementById('art-nature').value;
+      const longueur = document.getElementById('art-longueur').value.trim();
+      const largeur = document.getElementById('art-largeur').value.trim();
+      const hauteur = document.getElementById('art-hauteur').value.trim();
+      const tissus = document.getElementById('art-tissus').value;
+      const gaineOui = document.getElementById('art-gaine-oui').checked;
+      // Le code gaine est saisi manuellement pour info interne uniquement :
+      // il n'entre jamais dans le code article généré. Seul "-SG" est ajouté
+      // automatiquement si "Oui" est coché.
+      document.getElementById('art-colle-field').style.display = natureUtiliseColle(nature) ? '' : 'none';
+      code = computeArticleCode(nature, longueur, largeur, hauteur, tissus, gaineOui, '…');
+    } else {
+      code = document.getElementById('art-manual-code').value.trim() || '—';
+    }
 
-    const code = computeArticleCode(nature, longueur, largeur, hauteur, tissus, gaineOui, '…');
     document.getElementById('art-code-result').textContent = code;
     document.getElementById('art-intitule-result').textContent = intitule ? '— ' + intitule : '';
   }
@@ -1140,21 +1116,15 @@
     updateArticleCode();
   }
 
+  // Le menu n'affiche que les abréviations (VITA, VIDIE, VISA).
   function populateSiteSelect(){
     const el = document.getElementById('art-site');
-    el.innerHTML = SITES.map(s => `<option value="${s.code}">${s.label}</option>`).join('');
-  }
-
-  function populateDepotSelect(){
-    const siteCode = document.getElementById('art-site').value;
-    const depots = DEPOTS_BY_SITE[siteCode] || [];
-    const el = document.getElementById('art-depot');
-    el.innerHTML = depots.map(d => `<option value="${d.code}">${d.label} (${d.code})</option>`).join('');
+    el.innerHTML = SITES.map(s => `<option value="${s.code}">${s.code}</option>`).join('');
   }
 
   function toggleGestionStock(){
     const gere = document.getElementById('art-gestion-stock-oui').checked;
-    document.getElementById('art-site-depot-panel').style.display = gere ? '' : 'none';
+    document.getElementById('art-site-panel').style.display = gere ? '' : 'none';
   }
 
   // ---------- Article "database" (table Supabase "articles") ----------
@@ -1183,8 +1153,7 @@
         gaineCode: a.gaine_code,
         colleType: a.colle_type,
         gestionStock: a.gestion_stock,
-        site: a.site,
-        depot: a.depot,
+        sites: a.sites || [],
         surfaceMousse: a.surface_mousse,
         volumeMousse: a.volume_mousse,
         quantiteTissus: a.quantite_tissus,
@@ -1241,8 +1210,8 @@
     document.getElementById('art-form-subtitle').textContent = "Renseignez les caractéristiques puis créez l'article";
     document.getElementById('art-create-btn').textContent = "Créer l'article";
     document.getElementById('art-gestion-stock-oui').checked = true;
-    populateDepotSelect();
     toggleGestionStock();
+    document.getElementById('art-site').selectedIndex = 0;
     document.getElementById('art-categorie').selectedIndex = 0;
     document.getElementById('art-societe').selectedIndex = 0;
     document.getElementById('art-nature').selectedIndex = 0;
@@ -1254,38 +1223,46 @@
     document.getElementById('art-gaine-code').value = '';
     document.getElementById('art-gaine-code-field').style.display = 'none';
     document.getElementById('art-colle').selectedIndex = 0;
+    document.getElementById('art-manual-code').value = '';
     document.getElementById('art-intitule').value = '';
-    updateArticleCode();
+    toggleCategoryFields();
   }
 
-  // Pré-remplit le formulaire avec un article existant et passe en mode "édition"
+  // Pré-remplit le formulaire avec un article existant et passe en mode "édition".
+  // Le site sélectionné est le premier site déjà rattaché à l'article : changez-le
+  // et cliquez sur « Créer » pour rattacher un site supplémentaire au même article.
   function enterEditMode(a){
     editingArticleId = a.id;
     document.getElementById('art-form-title').textContent = 'Modifier l\'article ' + a.code;
-    document.getElementById('art-form-subtitle').textContent = 'Mettez à jour les caractéristiques puis enregistrez';
+    document.getElementById('art-form-subtitle').textContent = 'Modifiez les caractéristiques, ou choisissez un autre site puis cliquez sur « Créer » pour le rattacher à cet article';
     document.getElementById('art-create-btn').textContent = 'Enregistrer les modifications';
 
     document.getElementById('art-gestion-stock-oui').checked = !!a.gestionStock;
     document.getElementById('art-gestion-stock-non').checked = !a.gestionStock;
     toggleGestionStock();
-    if(a.site){ document.getElementById('art-site').value = a.site; }
-    populateDepotSelect();
-    if(a.depot){ document.getElementById('art-depot').value = a.depot; }
+    const firstSite = (a.sites && a.sites[0]) || '';
+    if(firstSite){ document.getElementById('art-site').value = firstSite; }
 
     document.getElementById('art-categorie').value = a.categorie || 'PF';
     document.getElementById('art-societe').value = a.societe || 'VT';
-    document.getElementById('art-nature').value = a.nature || '';
-    document.getElementById('art-longueur').value = a.longueur ?? '';
-    document.getElementById('art-largeur').value = a.largeur ?? '';
-    document.getElementById('art-hauteur').value = a.hauteur ?? '';
-    document.getElementById('art-tissus').value = a.tissus || '';
-    document.getElementById('art-gaine-oui').checked = !!a.gaineOui;
-    document.getElementById('art-gaine-non').checked = !a.gaineOui;
-    document.getElementById('art-gaine-code-field').style.display = a.gaineOui ? '' : 'none';
-    document.getElementById('art-gaine-code').value = a.gaineCode || '';
+    toggleCategoryFields();
+
+    if(categorieUtiliseCaracteristiques(a.categorie)){
+      document.getElementById('art-nature').value = a.nature || '';
+      document.getElementById('art-longueur').value = a.longueur ?? '';
+      document.getElementById('art-largeur').value = a.largeur ?? '';
+      document.getElementById('art-hauteur').value = a.hauteur ?? '';
+      document.getElementById('art-tissus').value = a.tissus || '';
+      document.getElementById('art-gaine-oui').checked = !!a.gaineOui;
+      document.getElementById('art-gaine-non').checked = !a.gaineOui;
+      document.getElementById('art-gaine-code-field').style.display = a.gaineOui ? '' : 'none';
+      document.getElementById('art-gaine-code').value = a.gaineCode || '';
+      if(a.colleType){ document.getElementById('art-colle').value = a.colleType; }
+    } else {
+      document.getElementById('art-manual-code').value = a.code || '';
+    }
     document.getElementById('art-intitule').value = a.intitule || '';
     updateArticleCode();
-    if(a.colleType){ document.getElementById('art-colle').value = a.colleType; }
   }
 
   function enterEditModeFromDetail(){
@@ -1297,31 +1274,51 @@
   }
 
   async function handleSaveArticle(){
-    const gestionStock = document.getElementById('art-gestion-stock-oui').checked;
-    const site = gestionStock ? document.getElementById('art-site').value : null;
-    const depot = gestionStock ? document.getElementById('art-depot').value : null;
     const categorie = document.getElementById('art-categorie').value;
     const societe = document.getElementById('art-societe').value;
-    const nature = document.getElementById('art-nature').value;
-    const longueur = document.getElementById('art-longueur').value.trim();
-    const largeur = document.getElementById('art-largeur').value.trim();
-    const hauteur = document.getElementById('art-hauteur').value.trim();
-    const tissus = document.getElementById('art-tissus').value;
-    const gaineOui = document.getElementById('art-gaine-oui').checked;
-    const gaineCode = document.getElementById('art-gaine-code').value.trim();
-    const colleType = natureUtiliseColle(nature) ? document.getElementById('art-colle').value : null;
+    const detailed = categorieUtiliseCaracteristiques(categorie);
+    const gestionStock = document.getElementById('art-gestion-stock-oui').checked;
+    const selectedSite = gestionStock ? document.getElementById('art-site').value : null;
     const intitule = document.getElementById('art-intitule').value.trim();
 
-    if(!longueur || !largeur || !hauteur){
-      showArtBanner("Veuillez renseigner la longueur, la largeur et la hauteur avant de créer l'article.", 'warning');
-      return;
-    }
-    if(gestionStock && (!site || !depot)){
-      showArtBanner("Veuillez choisir l'article site et le dépôt, ou décocher « Géré en stock ».", 'warning');
-      return;
+    let code, nature = null, longueur = null, largeur = null, hauteur = null, tissus = null,
+        gaineOui = false, gaineCode = null, colleType = null,
+        surfaceMousse = null, volumeMousse = null, quantiteTissus = null;
+
+    if(detailed){
+      nature = document.getElementById('art-nature').value;
+      const longueurRaw = document.getElementById('art-longueur').value.trim();
+      const largeurRaw = document.getElementById('art-largeur').value.trim();
+      const hauteurRaw = document.getElementById('art-hauteur').value.trim();
+      tissus = document.getElementById('art-tissus').value;
+      gaineOui = document.getElementById('art-gaine-oui').checked;
+      gaineCode = document.getElementById('art-gaine-code').value.trim();
+      colleType = natureUtiliseColle(nature) ? document.getElementById('art-colle').value : null;
+
+      if(!longueurRaw || !largeurRaw || !hauteurRaw){
+        showArtBanner("Veuillez renseigner la longueur, la largeur et la hauteur avant de créer l'article.", 'warning');
+        return;
+      }
+      code = computeArticleCode(nature, longueurRaw, largeurRaw, hauteurRaw, tissus, gaineOui, '');
+      const mousse = computeMousse(longueurRaw, largeurRaw, hauteurRaw);
+      surfaceMousse = mousse.surface;
+      volumeMousse = mousse.volume;
+      quantiteTissus = computeTissusConso(longueurRaw, largeurRaw, hauteurRaw);
+      longueur = parseFloat(longueurRaw);
+      largeur = parseFloat(largeurRaw);
+      hauteur = parseFloat(hauteurRaw);
+    } else {
+      code = document.getElementById('art-manual-code').value.trim();
+      if(!code){
+        showArtBanner('Veuillez saisir le code article.', 'warning');
+        return;
+      }
     }
 
-    const code = computeArticleCode(nature, longueur, largeur, hauteur, tissus, gaineOui, '');
+    if(gestionStock && !selectedSite){
+      showArtBanner("Veuillez choisir l'article site, ou décocher « Géré en stock ».", 'warning');
+      return;
+    }
 
     const createBtn = document.getElementById('art-create-btn');
     createBtn.disabled = true;
@@ -1329,33 +1326,59 @@
     createBtn.textContent = editingArticleId ? 'Enregistrement…' : 'Création…';
 
     try{
-      const mousse = computeMousse(longueur, largeur, hauteur);
-      const quantiteTissus = computeTissusConso(longueur, largeur, hauteur);
+      // Cherche si un article avec ce code existe déjà (le code est la clé
+      // d'unicité : un même article peut être rattaché à plusieurs sites).
+      const { data: existingRows, error: selectError } = await supabaseClient
+        .from('articles').select('*').eq('code', code).limit(1);
+      if(selectError) throw selectError;
+      const existing = existingRows && existingRows[0];
+
+      if(existing && existing.id !== editingArticleId){
+        const currentSites = existing.sites || [];
+        if(gestionStock && selectedSite && !currentSites.includes(selectedSite)){
+          const newSites = [...currentSites, selectedSite];
+          const { error: updError } = await supabaseClient.from('articles')
+            .update({ sites: newSites, updated_at: new Date().toISOString() })
+            .eq('id', existing.id);
+          if(updError) throw updError;
+          showArtBanner(`Article déjà créé (${code}). Site « ${selectedSite} » rattaché à l'article.`, 'info');
+        } else if(gestionStock && selectedSite){
+          showArtBanner(`Article déjà créé (${code}). Le site « ${selectedSite} » est déjà rattaché à cet article.`, 'info');
+        } else {
+          showArtBanner(`Article déjà créé (${code}).`, 'info');
+        }
+        enterCreateMode();
+        renderArticleList();
+        return;
+      }
 
       const payload = {
         code, intitule, categorie, societe, nature,
-        longueur: parseFloat(longueur), largeur: parseFloat(largeur), hauteur: parseFloat(hauteur),
+        longueur, largeur, hauteur,
         tissus, gaine_oui: gaineOui, gaine_code: gaineCode, colle_type: colleType,
-        gestion_stock: gestionStock, site, depot,
-        surface_mousse: mousse.surface, volume_mousse: mousse.volume, quantite_tissus: quantiteTissus
+        gestion_stock: gestionStock,
+        sites: (gestionStock && selectedSite) ? [selectedSite] : [],
+        surface_mousse: surfaceMousse, volume_mousse: volumeMousse, quantite_tissus: quantiteTissus
       };
 
       let error;
       if(editingArticleId){
         payload.updated_at = new Date().toISOString();
+        // En édition, on fusionne le site choisi avec les sites déjà rattachés
+        // plutôt que de les remplacer.
+        if(gestionStock && selectedSite){
+          const currentArticle = articlesCache.find(x => x.id === editingArticleId);
+          const currentSites = (currentArticle && currentArticle.sites) || [];
+          payload.sites = currentSites.includes(selectedSite) ? currentSites : [...currentSites, selectedSite];
+        }
         ({ error } = await supabaseClient.from('articles').update(payload).eq('id', editingArticleId));
       } else {
         ({ error } = await supabaseClient.from('articles').insert([payload]));
       }
 
       if(error){
-        if(error.code === '23505'){
-          const ou = depot ? ` dans le dépôt « ${depot} »` : '';
-          showArtBanner(`⚠️ Ce code article existe déjà${ou} : « ${code} ». Modifiez au moins une caractéristique, ou choisissez un autre dépôt, pour créer une ligne distincte.`, 'warning');
-        } else {
-          console.error('Erreur d\'enregistrement article', error);
-          showArtBanner("Une erreur est survenue lors de l'enregistrement de l'article.", 'warning');
-        }
+        console.error('Erreur d\'enregistrement article', error);
+        showArtBanner("Une erreur est survenue lors de l'enregistrement de l'article.", 'warning');
         return;
       }
 
@@ -1371,25 +1394,37 @@
     }
   }
 
+  // Supprime un article et VÉRIFIE que la suppression a bien eu lieu :
+  // si les policies RLS de Supabase bloquent le DELETE, l'appel ne renvoie
+  // pas d'erreur mais ne supprime aucune ligne — on le détecte ici.
+  async function deleteArticleById(id, code){
+    const { data, error } = await supabaseClient.from('articles').delete().eq('id', id).select();
+    if(error){
+      console.error('Erreur de suppression article', error);
+      alert("Une erreur est survenue lors de la suppression de l'article : " + error.message);
+      return false;
+    }
+    if(!data || data.length === 0){
+      alert(
+        "La suppression n'a rien supprimé côté serveur pour « " + (code || id) + " ».\n\n" +
+        "C'est presque toujours parce que la table \"articles\" dans Supabase n'a pas de policy RLS " +
+        "autorisant le DELETE. Ouvrez le script SQL fourni et exécutez la policy « Allow public delete »."
+      );
+      return false;
+    }
+    return true;
+  }
+
   async function handleDeleteArticle(){
     const a = articlesCache.find(x => x.id === currentDetailId);
     if(!a) return;
     if(!confirm(`Supprimer définitivement l'article « ${a.code} » ? Cette action est irréversible.`)) return;
-    try{
-      const { error } = await supabaseClient.from('articles').delete().eq('id', a.id);
-      if(error){
-        console.error('Erreur de suppression article', error);
-        alert("Une erreur est survenue lors de la suppression de l'article.");
-        return;
-      }
-      showView('article-create');
-      hideArtBanner();
-      enterCreateMode();
-      renderArticleList();
-    }catch(e){
-      console.error('Erreur de suppression article', e);
-      alert("Une erreur est survenue lors de la suppression de l'article.");
-    }
+    const ok = await deleteArticleById(a.id, a.code);
+    if(!ok) return;
+    showView('article-create');
+    hideArtBanner();
+    enterCreateMode();
+    renderArticleList();
   }
 
   function fmtNum(n, digits){
@@ -1431,8 +1466,8 @@
     if(!q) return true;
     const needle = q.trim().toLowerCase();
     if(!needle) return true;
-    return [a.code, a.nature, a.intitule, a.tissus, a.site, a.depot]
-      .some(v => (v || '').toString().toLowerCase().includes(needle));
+    const haystack = [a.code, a.nature, a.intitule, a.tissus, ...(a.sites || [])];
+    return haystack.some(v => (v || '').toString().toLowerCase().includes(needle));
   }
 
   async function renderArticleList(searchTerm){
@@ -1481,8 +1516,8 @@
         const a = articlesCache.find(x => x.id === btn.dataset.id);
         if(!a) return;
         if(!confirm(`Supprimer définitivement l'article « ${a.code} » ? Cette action est irréversible.`)) return;
-        const { error } = await supabaseClient.from('articles').delete().eq('id', a.id);
-        if(error){ alert("Une erreur est survenue lors de la suppression de l'article."); return; }
+        const ok = await deleteArticleById(a.id, a.code);
+        if(!ok) return;
         renderArticleList();
       });
     });
@@ -1499,17 +1534,20 @@
     document.getElementById('detail-code').textContent = a.code;
     document.getElementById('detail-intitule').textContent = a.intitule || 'Fiche article';
 
+    const dims = (a.longueur != null && a.largeur != null && a.hauteur != null)
+      ? `${a.longueur}×${a.largeur}×${a.hauteur}` : '—';
+    const sitesLabel = (a.sites && a.sites.length) ? a.sites.join(', ') : '—';
+
     document.getElementById('detail-carac-grid').innerHTML = `
       <div class="info-box"><div class="label">Catégorie</div><div class="value">${a.categorie || '—'}</div></div>
       <div class="info-box"><div class="label">Société</div><div class="value">${a.societe || '—'}</div></div>
       <div class="info-box"><div class="label">Nature</div><div class="value">${a.nature || '—'}</div></div>
-      <div class="info-box"><div class="label">Dimensions (cm)</div><div class="value">${a.longueur}×${a.largeur}×${a.hauteur}</div></div>
+      <div class="info-box"><div class="label">Dimensions (cm)</div><div class="value">${dims}</div></div>
       <div class="info-box"><div class="label">Tissus</div><div class="value">${a.tissus || '—'}</div></div>
       <div class="info-box"><div class="label">Gaine</div><div class="value">${a.gaineOui ? 'Oui' : 'Non'}</div><div class="sub">${a.gaineOui ? (a.gaineCode || '') : ''}</div></div>
       <div class="info-box"><div class="label">Colle</div><div class="value">${a.colleType || '—'}</div></div>
       <div class="info-box"><div class="label">Gestion stock</div><div class="value">${a.gestionStock ? 'Géré en stock' : 'Non géré'}</div></div>
-      <div class="info-box"><div class="label">Article site</div><div class="value">${a.site || '—'}</div></div>
-      <div class="info-box"><div class="label">Dépôt</div><div class="value">${a.depot || '—'}</div></div>
+      <div class="info-box"><div class="label">Article site(s)</div><div class="value" style="font-size:1rem;">${sitesLabel}</div></div>
       <div class="info-box"><div class="label">Créé le</div><div class="value" style="font-size:1rem;">${fmtDate(a.createdAt)}</div></div>
     `;
 
@@ -1526,15 +1564,16 @@
       <div class="info-box"><div class="label">PMP (CMUP)</div><div class="value" style="font-size:.95rem;">En attente</div><div class="sub">Nécessite l'historique des entrées de stock</div></div>
       <div class="info-box"><div class="label">Prix de dernière achat</div><div class="value" style="font-size:.95rem;">En attente</div><div class="sub">Nécessite l'historique des achats</div></div>
     `;
-    document.getElementById('detail-cout-note').textContent = a.gaineOui
-      ? "⚠️ Le coût gaine utilise un prix unitaire (PRU) SIMULÉ, en attendant la vraie valeur."
-      : '';
+    document.getElementById('detail-cout-note').textContent = !categorieUtiliseCaracteristiques(a.categorie)
+      ? "Cet article n'a pas de caractéristiques détaillées (catégorie sans nature/dimensions) : aucun coût standard n'est calculé."
+      : (a.gaineOui ? "⚠️ Le coût gaine utilise un prix unitaire (PRU) SIMULÉ, en attendant la vraie valeur." : '');
 
     document.getElementById('detail-stock-grid').innerHTML = `
       <div class="info-box"><div class="label">Quantité disponible</div><div class="value">${a.gestionStock ? '0' : '—'}</div>
-        <div class="sub">${a.gestionStock ? (a.site || '') + ' / ' + (a.depot || '') : 'Article non géré en stock'}</div></div>
+        <div class="sub">${a.gestionStock ? sitesLabel : 'Article non géré en stock'}</div></div>
     `;
 
+    try{ localStorage.setItem('vitafoam_detail_id', id); }catch(e){}
     showView('article-detail');
   }
 
@@ -1558,7 +1597,7 @@
   async function exportArticlesCsv(){
     const articles = await loadArticles();
     const header = ['Code','Intitulé','Catégorie','Société','Nature','Longueur','Largeur','Hauteur',
-      'Tissus','Gaine','Code gaine','Colle','Gestion stock','Article site','Dépôt',
+      'Tissus','Gaine','Code gaine','Colle','Gestion stock','Article site(s)',
       'Surface mousse (m²)','Volume mousse (m³)','Conso tissus (m²)',
       'Coût mousse (MGA)','Coût tissu (MGA)','Coût gaine (MGA)','Coût standard total (MGA)','Créé le'];
     const rows = [header];
@@ -1567,7 +1606,7 @@
       rows.push([
         a.code, a.intitule, a.categorie, a.societe, a.nature, a.longueur, a.largeur, a.hauteur,
         a.tissus, a.gaineOui ? 'Oui' : 'Non', a.gaineCode, a.colleType,
-        a.gestionStock ? 'Géré en stock' : 'Non géré', a.site, a.depot,
+        a.gestionStock ? 'Géré en stock' : 'Non géré', (a.sites || []).join(' | '),
         fmtNum(a.surfaceMousse,3), fmtNum(a.volumeMousse,4), fmtNum(a.quantiteTissus,3),
         Math.round(c.coutMousse||0), Math.round(c.coutTissu||0), Math.round(c.coutGaine||0), Math.round(c.total||0),
         fmtDate(a.createdAt)
@@ -1579,16 +1618,7 @@
   // ---------- Stock : filtres, extraction, export ----------
   function populateStockFilters(){
     const siteEl = document.getElementById('stock-site');
-    siteEl.innerHTML = '<option value="">Tous</option>' + SITES.map(s => `<option value="${s.code}">${s.label}</option>`).join('');
-    siteEl.addEventListener('change', () => populateStockDepotFilter());
-    populateStockDepotFilter();
-  }
-
-  function populateStockDepotFilter(){
-    const site = document.getElementById('stock-site').value;
-    const depots = site ? (DEPOTS_BY_SITE[site] || []) : Object.values(DEPOTS_BY_SITE).flat();
-    const depotEl = document.getElementById('stock-depot');
-    depotEl.innerHTML = '<option value="">Tous</option>' + depots.map(d => `<option value="${d.code}">${d.label} (${d.code})</option>`).join('');
+    siteEl.innerHTML = '<option value="">Tous</option>' + SITES.map(s => `<option value="${s.code}">${s.code}</option>`).join('');
   }
 
   let lastStockResults = [];
@@ -1600,34 +1630,33 @@
 
   async function renderStockExtraction(){
     const tbody = document.getElementById('stock-body');
-    tbody.innerHTML = '<tr><td colspan="8">Chargement…</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7">Chargement…</td></tr>';
 
     const societe = document.getElementById('stock-societe').value;
     const site = document.getElementById('stock-site').value;
-    const depot = document.getElementById('stock-depot').value;
     const dateRef = document.getElementById('stock-date-ref').value;
     // La date de référence fixe le jour d'arrêté du stock (aucun mouvement de
     // stock daté n'existe encore) — elle est conservée pour filtrer
-    // l'historique dès que le module Entrées/Sorties sera en place.
+    // l'historique dès que le module Entrées/Sorties sera en place. Le dépôt
+    // n'est plus un champ de l'article : il dépendra des mouvements de stock.
 
     const articles = await loadArticles();
     const filtered = articles.filter(a =>
       (!societe || a.societe === societe) &&
-      (!site || a.site === site) &&
-      (!depot || a.depot === depot) &&
+      (!site || (a.sites || []).includes(site)) &&
       a.gestionStock
     );
 
     lastStockResults = filtered.map(a => {
       const c = computeCoutStandard(a);
       return {
-        code: a.code, intitule: a.intitule, site: a.site, depot: a.depot,
+        code: a.code, intitule: a.intitule, sites: (a.sites || []).join(', '),
         dateRef, quantite: 0, pru: c.total, valeur: 0
       };
     });
 
     if(!lastStockResults.length){
-      tbody.innerHTML = '<tr><td colspan="8">Aucun article géré en stock pour ces filtres.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7">Aucun article géré en stock pour ces filtres.</td></tr>';
       return;
     }
     tbody.innerHTML = '';
@@ -1636,8 +1665,7 @@
       tr.innerHTML = `
         <td><strong>${r.code}</strong></td>
         <td>${r.intitule || '—'}</td>
-        <td>${r.site || '—'}</td>
-        <td>${r.depot || '—'}</td>
+        <td>${r.sites || '—'}</td>
         <td>${r.dateRef ? formatDateFr(r.dateRef) : '—'}</td>
         <td>${r.quantite}</td>
         <td>${fmtMga(r.pru)}</td>
@@ -1652,9 +1680,9 @@
       alert("Lancez d'abord une extraction avant d'exporter.");
       return;
     }
-    const header = ['Code','Intitulé article','Site','Dépôt','Date de référence','Quantité disponible','Prix de revient unitaire (MGA)','Valeur (MGA)'];
+    const header = ['Code','Intitulé article','Article site(s)','Date de référence','Quantité disponible','Prix de revient unitaire (MGA)','Valeur (MGA)'];
     const rows = [header].concat(lastStockResults.map(r => [
-      r.code, r.intitule, r.site, r.depot, r.dateRef ? formatDateFr(r.dateRef) : '', r.quantite, Math.round(r.pru||0), Math.round(r.valeur||0)
+      r.code, r.intitule, r.sites, r.dateRef ? formatDateFr(r.dateRef) : '', r.quantite, Math.round(r.pru||0), Math.round(r.valeur||0)
     ]));
     downloadCsv('etat_stock_vitafoam.csv', rows);
   }
