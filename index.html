@@ -324,6 +324,60 @@
   .empty-state .big{font-size:2.6rem; margin-bottom:12px;}
   .empty-state h2{color:var(--navy-deep); margin-bottom:8px;}
 
+  /* ---------- APP SHELL : sidebar (left) + content (right), style HubSpot ---------- */
+  .app-shell{display:flex; min-height:100vh; background:#F4F6FA; align-items:stretch;}
+  .sidebar{
+    width:248px; flex-shrink:0; background:var(--navy-deep); color:var(--white);
+    display:flex; flex-direction:column; position:sticky; top:0; height:100vh; z-index:20;
+  }
+  .sidebar-logo{padding:22px 18px 16px;}
+  .sidebar-logo img{height:36px; display:block;}
+  .sidebar-nav{flex:1; padding:8px 12px; display:flex; flex-direction:column; gap:3px; overflow-y:auto;}
+  .nav-item{
+    display:flex; align-items:center; gap:12px; width:100%;
+    padding:11px 14px; border-radius:10px; background:transparent; border:none;
+    color:rgba(255,255,255,.72); font-weight:600; font-size:.9rem; text-align:left;
+    font-family:inherit; transition:background .15s ease, color .15s ease;
+  }
+  .nav-item .ic{font-size:1.05rem; width:20px; text-align:center;}
+  .nav-item:hover{background:rgba(255,255,255,.08); color:var(--white);}
+  .nav-item.active{background:var(--yellow); color:var(--navy-deep);}
+  .nav-item.active:hover{background:var(--yellow);}
+  .sidebar-user{
+    padding:14px 16px; border-top:1px solid rgba(255,255,255,.12);
+    display:flex; align-items:center; gap:11px;
+  }
+  .sidebar-user .avatar{
+    width:38px; height:38px; border-radius:50%; background:var(--yellow); color:var(--navy-deep);
+    display:flex; align-items:center; justify-content:center; font-weight:800; flex-shrink:0; font-size:.85rem;
+  }
+  .sidebar-user-info{min-width:0; flex:1;}
+  .sidebar-user-email{
+    font-size:.75rem; color:rgba(255,255,255,.68); overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap; margin-bottom:7px;
+  }
+  .sidebar-user-info .logout-btn{
+    width:100%; text-align:center; border-color:rgba(255,255,255,.22); color:rgba(255,255,255,.85);
+    padding:7px 8px; font-size:.76rem;
+  }
+  .sidebar-user-info .logout-btn:hover{border-color:var(--danger); color:#ffb4a8;}
+
+  .app-main{flex:1; min-width:0; overflow-y:auto; height:100vh;}
+  .view{display:none; padding:clamp(18px,3vw,34px); max-width:1180px; margin:0 auto;}
+  .view.active{display:block;}
+
+  @media (max-width:820px){
+    .app-shell{flex-direction:column;}
+    .sidebar{width:100%; height:auto; position:sticky; top:0; flex-direction:row; align-items:center;}
+    .sidebar-logo{padding:10px 14px;}
+    .sidebar-nav{flex-direction:row; padding:8px; overflow-x:auto; gap:6px;}
+    .nav-item{white-space:nowrap; padding:9px 12px;}
+    .sidebar-user{border-top:none; border-left:1px solid rgba(255,255,255,.14); flex-shrink:0;}
+    .sidebar-user-email{display:none;}
+    .sidebar-user-info .logout-btn{width:auto; padding:7px 12px;}
+    .app-main{height:auto;}
+  }
+
   /* ---------- ARTICLE LIST / SEARCH / CRUD ---------- */
   .search-bar{padding:16px 22px 0;}
   .search-bar input{
@@ -420,58 +474,37 @@
 </section>
 
 <!-- ============ POST-LOGIN MENU ============ -->
-<section id="screen-menu" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <div class="avatar" id="menu-user-initial">U</div>
-      <button class="logout-btn" id="btn-logout-menu">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
-    <div class="dash-head">
-      <div>
-        <h2>Votre espace</h2>
-        <p id="menu-user-line">Que souhaitez-vous faire ?</p>
+<!-- ============ APP SHELL (post-login) : sidebar + contenu ============ -->
+<section id="screen-app" class="screen">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
+      <nav class="sidebar-nav">
+        <button type="button" class="nav-item" id="nav-production" data-view="dash">
+          <span class="ic">🏭</span><span>Production</span>
+        </button>
+        <button type="button" class="nav-item" id="nav-article" data-view="article-create">
+          <span class="ic">🏷️</span><span>Article</span>
+        </button>
+        <button type="button" class="nav-item" id="nav-stock" data-view="stock">
+          <span class="ic">📦</span><span>Stock</span>
+        </button>
+        <button type="button" class="nav-item" id="nav-budget" data-view="budget">
+          <span class="ic">📊</span><span>Budget</span>
+        </button>
+      </nav>
+      <div class="sidebar-user">
+        <div class="avatar" id="user-initial">U</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-email" id="sidebar-user-email">—</div>
+          <button type="button" class="logout-btn" id="btn-logout">Déconnexion</button>
+        </div>
       </div>
-    </div>
-    <div class="menu-grid">
-      <button class="menu-card" type="button" id="card-article">
-        <div class="icon">🏷️</div>
-        <h3>Article</h3>
-        <p>Générer un code article</p>
-      </button>
-      <button class="menu-card" type="button" id="card-stock">
-        <div class="icon">📦</div>
-        <h3>Stock</h3>
-        <p>État de stock &amp; extraction</p>
-      </button>
-      <button class="menu-card" type="button" id="card-production">
-        <div class="icon">🏭</div>
-        <h3>Production</h3>
-        <p>Tableau de bord industriel</p>
-      </button>
-      <button class="menu-card" type="button" id="card-budget">
-        <div class="icon">📊</div>
-        <h3>Budget</h3>
-        <p>Bientôt disponible</p>
-      </button>
-    </div>
-  </div>
-</section>
+    </aside>
 
-<!-- ============ DASHBOARD (Production) ============ -->
-<section id="screen-dash" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-menu-from-dash">← Menu</button>
-      <div class="avatar" id="user-initial">U</div>
-      <button class="logout-btn" id="btn-logout">Déconnexion</button>
-    </div>
-  </div>
+    <main class="app-main">
+      <div class="view" id="view-dash">
 
-  <div class="dash-wrap">
     <div class="dash-head">
       <div>
         <h2>Tableau de bord industriel</h2>
@@ -519,20 +552,11 @@
     </div>
 
     <footer class="dash-footer">Données de démonstration — à connecter à l'export mensuel réel. VITAFOAM MADAGASCAR © 2026</footer>
-  </div>
-</section>
+  
+      </div>
 
-<!-- ============ ARTICLE — MENU ============ -->
-<!-- ============ ARTICLE — CRÉATEUR + LISTE/RECHERCHE ============ -->
-<section id="screen-article-create" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-menu-from-article-create">← Menu</button>
-      <button class="logout-btn" id="btn-logout-article-create">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
+      <div class="view" id="view-article-create">
+
     <div class="dash-head">
       <div>
         <h2 id="art-form-title">Créateur de code article</h2>
@@ -676,21 +700,14 @@
         </div>
       </div>
     </div>
-  </div>
-</section>
+  
+      </div>
 
-<!-- ============ ARTICLE — DÉTAIL ============ -->
-<section id="screen-article-detail" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-list-from-article-detail">← Articles</button>
-      <button class="logout-btn" id="btn-logout-article-detail">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
+      <div class="view" id="view-article-detail">
+
     <div class="dash-head">
       <div>
+        <button type="button" class="logout-btn" id="btn-list-from-article-detail" style="margin-bottom:10px;">← Retour aux articles</button>
         <h2 id="detail-code">—</h2>
         <p id="detail-intitule">Fiche article</p>
       </div>
@@ -721,20 +738,11 @@
       <div class="info-grid" id="detail-stock-grid"></div>
       <p style="padding:0 22px 18px; font-size:.82rem; color:#5a6b80;">La quantité disponible s'activera dès que le module Entrées / Sorties de stock sera mis en place.</p>
     </div>
-  </div>
-</section>
+  
+      </div>
 
-<!-- ============ STOCK — HUB ============ -->
-<!-- ============ STOCK — EXTRACTION / ÉTAT DE STOCK ============ -->
-<section id="screen-stock" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-menu-from-stock">← Menu</button>
-      <button class="logout-btn" id="btn-logout-stock">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
+      <div class="view" id="view-stock">
+
     <div class="dash-head">
       <div>
         <h2>Stock</h2>
@@ -795,24 +803,19 @@
         </table>
       </div>
     </div>
-  </div>
-</section>
+  
+      </div>
 
-<!-- ============ BUDGET (placeholder) ============ -->
-<section id="screen-budget" class="screen">
-  <div class="dash-top">
-    <div class="brand-mark"><img class="logo-img" alt="VITAFOAM Madagascar"></div>
-    <div class="who">
-      <button class="logout-btn" id="btn-menu-from-budget">← Menu</button>
-      <button class="logout-btn" id="btn-logout-budget">Déconnexion</button>
-    </div>
-  </div>
-  <div class="dash-wrap">
+      <div class="view" id="view-budget">
+
     <div class="empty-state">
       <div class="big">📊</div>
       <h2>Budget</h2>
       <p>Cette section arrive bientôt.</p>
     </div>
+  
+      </div>
+    </main>
   </div>
 </section>
 
@@ -858,6 +861,17 @@
     window.scrollTo(0,0);
   }
 
+  // Switches between the views inside the app shell's content area (sidebar stays put)
+  function showView(name){
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-'+name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const navMap = { 'dash':'nav-production', 'article-create':'nav-article', 'article-detail':'nav-article', 'stock':'nav-stock', 'budget':'nav-budget' };
+    const navBtn = document.getElementById(navMap[name]);
+    if(navBtn) navBtn.classList.add('active');
+    document.querySelector('.app-main').scrollTo(0,0);
+  }
+
   function handleLogin(e){
     if(e) e.preventDefault();
     const email = document.getElementById('email');
@@ -872,10 +886,11 @@
 
     const initial = email.value.trim().charAt(0).toUpperCase() || 'U';
     document.getElementById('user-initial').textContent = initial;
-    document.getElementById('menu-user-initial').textContent = initial;
+    document.getElementById('sidebar-user-email').textContent = email.value;
     document.getElementById('dash-user-line').textContent = 'Connecté en tant que ' + email.value;
-    document.getElementById('menu-user-line').textContent = 'Connecté en tant que ' + email.value;
-    showScreen('menu');
+    showScreen('app');
+    renderDashboard();
+    showView('dash');
     return false;
   }
 
@@ -1278,7 +1293,7 @@
     if(!a) return;
     enterEditMode(a);
     hideArtBanner();
-    showScreen('article-create');
+    showView('article-create');
   }
 
   async function handleSaveArticle(){
@@ -1367,7 +1382,7 @@
         alert("Une erreur est survenue lors de la suppression de l'article.");
         return;
       }
-      showScreen('article-create');
+      showView('article-create');
       hideArtBanner();
       enterCreateMode();
       renderArticleList();
@@ -1458,7 +1473,7 @@
     tbody.querySelectorAll('[data-action="edit"]').forEach(btn=>{
       btn.addEventListener('click', () => {
         const a = articlesCache.find(x => x.id === btn.dataset.id);
-        if(a){ enterEditMode(a); hideArtBanner(); showScreen('article-create'); }
+        if(a){ enterEditMode(a); hideArtBanner(); showView('article-create'); }
       });
     });
     tbody.querySelectorAll('[data-action="delete"]').forEach(btn=>{
@@ -1479,7 +1494,7 @@
   function openArticleDetail(id){
     currentDetailId = id;
     const a = articlesCache.find(x => x.id === id);
-    if(!a){ showScreen('article-create'); return; }
+    if(!a){ showView('article-create'); return; }
 
     document.getElementById('detail-code').textContent = a.code;
     document.getElementById('detail-intitule').textContent = a.intitule || 'Fiche article';
@@ -1520,7 +1535,7 @@
         <div class="sub">${a.gestionStock ? (a.site || '') + ' / ' + (a.depot || '') : 'Article non géré en stock'}</div></div>
     `;
 
-    showScreen('article-detail');
+    showView('article-detail');
   }
 
   // ---------- Export CSV ----------
@@ -1674,29 +1689,19 @@
     document.getElementById('btn-month').addEventListener('click', () => setPeriod('month'));
     document.getElementById('btn-ytd').addEventListener('click', () => setPeriod('ytd'));
 
-    // Post-login menu cards
-    document.getElementById('card-article').addEventListener('click', () => { hideArtBanner(); enterCreateMode(); showScreen('article-create'); renderArticleList(); });
-    document.getElementById('card-stock').addEventListener('click', () => showScreen('stock'));
-    document.getElementById('card-production').addEventListener('click', () => { renderDashboard(); showScreen('dash'); });
-    document.getElementById('card-budget').addEventListener('click', () => showScreen('budget'));
-
-    // "Back to menu" and logout buttons on every inner screen
-    document.getElementById('btn-logout-menu').addEventListener('click', () => showScreen('home'));
-    document.getElementById('btn-menu-from-dash').addEventListener('click', () => showScreen('menu'));
-    document.getElementById('btn-menu-from-stock').addEventListener('click', () => showScreen('menu'));
-    document.getElementById('btn-logout-stock').addEventListener('click', () => showScreen('home'));
-    document.getElementById('btn-menu-from-budget').addEventListener('click', () => showScreen('menu'));
-    document.getElementById('btn-logout-budget').addEventListener('click', () => showScreen('home'));
+    // Sidebar navigation (HubSpot-style: sidebar stays, only the content view swaps)
+    document.getElementById('nav-production').addEventListener('click', () => { renderDashboard(); showView('dash'); });
+    document.getElementById('nav-article').addEventListener('click', () => { hideArtBanner(); enterCreateMode(); showView('article-create'); renderArticleList(); });
+    document.getElementById('nav-stock').addEventListener('click', () => showView('stock'));
+    document.getElementById('nav-budget').addEventListener('click', () => showView('budget'));
+    document.getElementById('btn-logout').addEventListener('click', () => showScreen('home'));
 
     // Article — créateur + liste/recherche
-    document.getElementById('btn-menu-from-article-create').addEventListener('click', () => showScreen('menu'));
-    document.getElementById('btn-logout-article-create').addEventListener('click', () => showScreen('home'));
     document.getElementById('art-search').addEventListener('input', (e) => renderArticleList(e.target.value));
     document.getElementById('btn-export-articles').addEventListener('click', exportArticlesCsv);
 
     // Article — détail
-    document.getElementById('btn-list-from-article-detail').addEventListener('click', () => { showScreen('article-create'); renderArticleList(); });
-    document.getElementById('btn-logout-article-detail').addEventListener('click', () => showScreen('home'));
+    document.getElementById('btn-list-from-article-detail').addEventListener('click', () => { showView('article-create'); renderArticleList(); });
     document.getElementById('btn-detail-edit').addEventListener('click', enterEditModeFromDetail);
     document.getElementById('btn-detail-delete').addEventListener('click', handleDeleteArticle);
 
