@@ -1722,7 +1722,6 @@
     document.getElementById('nav-article').addEventListener('click', () => { hideArtBanner(); enterCreateMode(); showView('article-create'); renderArticleList(); });
     document.getElementById('nav-stock').addEventListener('click', () => showView('stock'));
     document.getElementById('nav-budget').addEventListener('click', () => showView('budget'));
-    document.getElementById('btn-logout').addEventListener('click', () => showScreen('home'));
 
     // Article — créateur + liste/recherche
     document.getElementById('art-search').addEventListener('input', (e) => renderArticleList(e.target.value));
@@ -1738,12 +1737,11 @@
     populateSelect('art-tissus', TISSUS_LIST);
     populateSelect('art-colle', COLLE_TYPES);
     populateSiteSelect();
-    populateDepotSelect();
     toggleGestionStock();
     document.getElementById('art-gestion-stock-oui').addEventListener('change', toggleGestionStock);
     document.getElementById('art-gestion-stock-non').addEventListener('change', toggleGestionStock);
-    document.getElementById('art-site').addEventListener('change', populateDepotSelect);
-    ['art-nature','art-longueur','art-largeur','art-hauteur','art-tissus','art-gaine-code','art-intitule']
+    document.getElementById('art-categorie').addEventListener('change', toggleCategoryFields);
+    ['art-nature','art-longueur','art-largeur','art-hauteur','art-tissus','art-gaine-code','art-manual-code','art-intitule']
       .forEach(id => {
         document.getElementById(id).addEventListener('input', updateArticleCode);
         document.getElementById(id).addEventListener('change', updateArticleCode);
@@ -1756,6 +1754,7 @@
       renderArticleList();
     });
     document.getElementById('art-create-btn').addEventListener('click', handleSaveArticle);
+    enterCreateMode(); // état initial cohérent (catégorie PF, champs détaillés visibles, code "—")
 
     // Stock — extraction
     populateStockFilters();
