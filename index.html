@@ -1749,9 +1749,20 @@
     document.getElementById('art-gaine-oui').addEventListener('change', toggleGaineField);
     document.getElementById('art-gaine-non').addEventListener('change', toggleGaineField);
     document.getElementById('art-cancel-btn').addEventListener('click', () => {
-      enterCreateMode();
-      hideArtBanner();
-      renderArticleList();
+      try{
+        const wasEditing = !!editingArticleId;
+        enterCreateMode();
+        showArtBanner(
+          wasEditing ? '↩️ Modification annulée — le formulaire a été réinitialisé.' : '↩️ Création annulée — le formulaire a été réinitialisé.',
+          'info'
+        );
+        const main = document.querySelector('.app-main');
+        if(main) main.scrollTo(0, 0);
+        renderArticleList();
+      }catch(e){
+        console.error("Erreur lors de l'annulation", e);
+        alert("L'annulation a rencontré une erreur : " + (e && e.message ? e.message : e));
+      }
     });
     document.getElementById('art-create-btn').addEventListener('click', handleSaveArticle);
     enterCreateMode(); // état initial cohérent (catégorie PF, champs détaillés visibles, code "—")
