@@ -748,11 +748,80 @@
     <div class="dash-head">
       <div>
         <h2>Stock</h2>
-        <p>État de stock par société, site et dépôt — extraction mensuelle exportable</p>
+        <p>Quantités et valorisation calculées à partir des mouvements d'entrée / sortie (transferts, réceptions, production, ventes)</p>
       </div>
     </div>
 
-    <div id="stock-banner" class="art-banner info">⚠️ Les quantités disponibles resteront à 0 tant que le module Entrées / Sorties de stock n'est pas en place. Le prix de revient unitaire (coût standard) et les filtres sont déjà fonctionnels.</div>
+    <div id="stock-banner" class="art-banner info" style="display:none;"></div>
+
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-head"><h3>Nouveau mouvement (entrée / sortie)</h3></div>
+      <div style="padding:22px;">
+        <div id="mv-banner" class="art-banner" style="display:none;"></div>
+        <div class="form-grid">
+          <div class="field" style="grid-column:1 / -1;">
+            <label for="mv-article">Article</label>
+            <select id="mv-article"></select>
+          </div>
+          <div class="field">
+            <label>Type de mouvement</label>
+            <div class="radio-row">
+              <label><input type="radio" name="mv-type" id="mv-type-entree" value="entree" checked> Entrée</label>
+              <label><input type="radio" name="mv-type" id="mv-type-sortie" value="sortie"> Sortie</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="mv-motif">Motif</label>
+            <select id="mv-motif">
+              <option value="reception">Réception fournisseur</option>
+              <option value="transfert">Transfert inter-sites</option>
+              <option value="production">Production</option>
+              <option value="vente">Vente / expédition</option>
+              <option value="ajustement">Ajustement d'inventaire</option>
+              <option value="inventaire">Inventaire initial</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="mv-site">Article site</label>
+            <select id="mv-site"></select>
+          </div>
+          <div class="field">
+            <label for="mv-quantite">Quantité</label>
+            <input type="number" id="mv-quantite" min="0" step="any" placeholder="ex : 10">
+          </div>
+          <div class="field">
+            <label for="mv-date">Date du mouvement</label>
+            <input type="date" id="mv-date">
+          </div>
+          <div class="field">
+            <label for="mv-reference">Référence (n° transfert, réception…)</label>
+            <input type="text" id="mv-reference" placeholder="Optionnel">
+          </div>
+          <div class="field" style="grid-column:1 / -1;">
+            <label for="mv-note">Note</label>
+            <input type="text" id="mv-note" placeholder="Optionnel">
+          </div>
+        </div>
+        <div class="form-actions" style="justify-content:flex-start;">
+          <button type="button" class="btn-create" id="mv-save-btn">Enregistrer le mouvement</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-head"><h3>Derniers mouvements</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Code article</th><th>Site</th><th>Type</th><th>Motif</th>
+              <th>Quantité</th><th>Référence</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="mv-list-body"><tr><td colspan="8">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
 
     <div class="panel" style="margin-bottom:20px;">
       <div class="panel-head"><h3>Filtres d'extraction</h3></div>
@@ -778,6 +847,7 @@
             <input type="date" id="stock-date-ref">
           </div>
         </div>
+        <p style="font-size:.85rem; color:#5a6b80; margin-top:4px;">La quantité disponible est calculée en additionnant tous les mouvements (entrées − sorties) enregistrés jusqu'à la date de référence incluse.</p>
         <div class="form-actions" style="justify-content:flex-start;">
           <button type="button" class="btn-create" id="stock-extraire-btn">Extraire l'état de stock</button>
           <button type="button" class="btn-export" id="stock-export-btn">⬇️ Export CSV</button>
@@ -804,10 +874,80 @@
 
       <div class="view" id="view-budget">
 
-    <div class="empty-state">
-      <div class="big">📊</div>
-      <h2>Budget</h2>
-      <p>Cette section arrive bientôt.</p>
+    <div class="dash-head">
+      <div>
+        <h2>Budget &amp; valorisation du stock</h2>
+        <p>Calculé en temps réel à partir des articles, de leur prix de revient et des mouvements de stock</p>
+      </div>
+    </div>
+
+    <div id="budget-banner" class="art-banner info" style="display:none;"></div>
+
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-head"><h3>Filtres</h3></div>
+      <div style="padding:22px;">
+        <div class="form-grid">
+          <div class="field">
+            <label for="budget-societe">Société</label>
+            <select id="budget-societe">
+              <option value="">Toutes</option>
+              <option value="VT">VT</option>
+              <option value="VD">VD</option>
+              <option value="VS">VS</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="budget-date-ref">Date de référence</label>
+            <input type="date" id="budget-date-ref">
+          </div>
+        </div>
+        <div class="form-actions" style="justify-content:flex-start;">
+          <button type="button" class="btn-create" id="budget-actualiser-btn">Actualiser</button>
+          <button type="button" class="btn-export" id="budget-export-btn">⬇️ Export CSV (top articles)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-grid" id="budget-kpi-grid"></div>
+
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-head"><h3>Valorisation par société</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Société</th><th>Articles en stock</th><th>Quantité totale</th><th>Valeur (MGA)</th><th>Part</th></tr></thead>
+          <tbody id="budget-societe-body"><tr><td colspan="5">—</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-head"><h3>Valorisation par site</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Article site</th><th>Articles en stock</th><th>Quantité totale</th><th>Valeur (MGA)</th><th>Part</th></tr></thead>
+          <tbody id="budget-site-body"><tr><td colspan="5">—</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-head"><h3>Valorisation par catégorie</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Catégorie</th><th>Articles en stock</th><th>Quantité totale</th><th>Valeur (MGA)</th><th>Part</th></tr></thead>
+          <tbody id="budget-categorie-body"><tr><td colspan="5">—</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3>Top articles par valeur de stock</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Code article</th><th>Intitulé</th><th>Société</th><th>Article site(s)</th><th>Quantité</th><th>PRU (MGA)</th><th>Valeur (MGA)</th></tr></thead>
+          <tbody id="budget-top-body"><tr><td colspan="7">—</td></tr></tbody>
+        </table>
+      </div>
     </div>
   
       </div>
