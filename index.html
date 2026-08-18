@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VITAFOAM Madagascar</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><text y=%2250%22 x=%2250%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2248%22>🟡</text></svg>">
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800;900&family=Inter:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <style>
@@ -411,6 +413,11 @@
   @media (prefers-reduced-motion: reduce){
     *{transition:none !important; animation:none !important;}
   }
+
+  /* ---------- PRODUCTION ERP ---------- */
+  .prod-flow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0 22px}.prod-step{background:#fff;border:1.5px solid #e4e9f1;border-radius:12px;padding:10px 14px;font-weight:700;font-size:.82rem;color:var(--navy-deep)}.prod-step.done{background:#DFF3E8;border-color:#b8e4ca;color:var(--ok)}.prod-step.current{background:var(--yellow-soft);border-color:var(--yellow-deep);color:#795c00}.prod-arrow{color:#9aa6b8;font-weight:900}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.mini-note{font-size:.8rem;color:#6b7891;line-height:1.5}.status-pill{display:inline-flex;padding:5px 10px;border-radius:999px;background:#eef3f8;font-size:.75rem;font-weight:800;color:var(--navy)}.input-table input,.input-table select{min-width:110px;padding:8px 9px;border:1px solid #dfe5ed;border-radius:8px;background:#fff}.click-row{cursor:pointer}.click-row:hover{background:#fff9df}.material-ok{color:var(--ok);font-weight:800}.material-bad{color:var(--danger);font-weight:800}.section-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}.section-tabs button{border:1px solid #dfe5ed;background:#fff;padding:9px 14px;border-radius:999px;font-weight:700;color:#596b82}.section-tabs button.active{background:var(--navy);color:#fff;border-color:var(--navy)}.hidden{display:none!important}.modal-ish{background:#f8fafc;border:1px solid #e7edf5;border-radius:14px;padding:18px}.of-link{border:none;background:none;color:var(--blue);font-weight:800;text-decoration:underline;cursor:pointer;padding:0}.alert-inline{padding:10px 12px;border-radius:10px;background:#fff7d5;color:#7f6500;font-size:.84rem;font-weight:600}.danger-text{color:var(--danger)}
+  @media(max-width:760px){.two-col,.three-col{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -510,9 +517,10 @@
         <h2>Tableau de bord industriel</h2>
         <p id="dash-user-line">Suivi de production — connecté</p>
       </div>
-      <div class="toggle-group">
-        <button id="btn-month" class="active">Mensuel</button>
-        <button id="btn-ytd">Cumul YTD</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button type="button" class="btn-create" id="prod-action-new-of">＋ Nouvel OF Bloc</button>
+        <button type="button" class="btn-export" id="prod-action-bom">🧪 Nomenclatures</button>
+        <button type="button" class="logout-btn" id="prod-action-refresh">↻ Actualiser</button>
       </div>
     </div>
 
@@ -551,8 +559,47 @@
       </div>
     </div>
 
-    <footer class="dash-footer">Données de démonstration — à connecter à l'export mensuel réel. VITAFOAM MADAGASCAR © 2026</footer>
+    <footer class="dash-footer">Données Supabase — suivi réel des OF VITAFOAM MADAGASCAR © 2026</footer>
   
+      </div>
+
+      <div class="view" id="view-of-new">
+        <div class="dash-head"><div><h2>Créer un OF Bloc</h2><p>Le standard actif de la nomenclature est automatiquement figé dans l'OF.</p></div></div>
+        <div id="of-new-banner" class="art-banner" style="display:none;"></div>
+        <div class="panel"><div class="panel-head"><h3>Ordre de fabrication Bloc</h3></div><div style="padding:22px;">
+          <div class="form-grid">
+            <div class="field"><label for="of-block-article">Article mère / Bloc</label><select id="of-block-article"></select></div>
+            <div class="field"><label for="of-planned-blocks">Nombre de blocs prévu</label><input id="of-planned-blocks" type="number" min="1" value="1"></div>
+            <div class="field"><label for="of-site">Site</label><select id="of-site"><option>VITA</option><option>VIDIE</option><option>VISA</option></select></div>
+            <div class="field"><label for="of-date-plan">Date prévue</label><input id="of-date-plan" type="date"></div>
+            <div class="field" style="grid-column:1/-1"><label for="of-notes">Observation</label><input id="of-notes" type="text" placeholder="Optionnel"></div>
+          </div>
+          <div class="alert-inline">À la création, l'ERP copie la nomenclature active du bloc et calcule automatiquement les besoins MP théoriques.</div>
+          <div class="form-actions" style="justify-content:flex-start"><button class="btn-create" id="of-create-btn">Créer l'OF et figer le standard</button></div>
+        </div></div>
+      </div>
+
+      <div class="view" id="view-bom">
+        <div class="dash-head"><div><h2>Nomenclatures de production Bloc</h2><p>Références standard des OF : BLOC SGA, SGB, SGC, SGD et SGN.</p></div></div>
+        <div id="bom-banner" class="art-banner" style="display:none;"></div>
+        <div class="panel"><div class="panel-head"><h3>Standard MP par bloc</h3></div><div style="padding:22px;">
+          <div class="form-grid"><div class="field"><label>Article mère</label><select id="bom-parent"></select></div><div class="field"><label>Version active</label><input id="bom-version" type="number" min="1" value="1"></div></div>
+          <div class="table-scroll"><table class="input-table"><thead><tr><th>Composant MP</th><th>Désignation</th><th>Unité</th><th>Qté standard / bloc</th></tr></thead><tbody id="bom-lines-body"></tbody></table></div>
+          <div class="form-actions" style="justify-content:flex-start"><button class="btn-create" id="bom-save-btn">Enregistrer le standard</button></div>
+        </div></div>
+      </div>
+
+      <div class="view" id="view-of-detail">
+        <div class="dash-head"><div><button class="logout-btn" id="of-detail-back" style="margin-bottom:10px">← Retour Production</button><h2 id="ofd-title">OF</h2><p id="ofd-subtitle">Traçabilité complète</p></div><div><span class="status-pill" id="ofd-status">—</span></div></div>
+        <div class="prod-flow" id="ofd-flow"></div>
+        <div id="ofd-banner" class="art-banner" style="display:none"></div>
+        <div id="ofd-summary" class="kpi-grid"></div>
+        <div class="section-tabs" id="ofd-tabs"><button data-tab="standard" class="active">Standard</button><button data-tab="viking">1. Viking / Séchoir</button><button data-tab="debitage">2. Débitage</button><button data-tab="confection">3. Confection</button><button data-tab="trace">Traçabilité</button></div>
+        <div id="ofd-tab-standard" class="ofd-tab"></div>
+        <div id="ofd-tab-viking" class="ofd-tab hidden"></div>
+        <div id="ofd-tab-debitage" class="ofd-tab hidden"></div>
+        <div id="ofd-tab-confection" class="ofd-tab hidden"></div>
+        <div id="ofd-tab-trace" class="ofd-tab hidden"></div>
       </div>
 
       <div class="view" id="view-article-create">
@@ -958,8 +1005,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // ---------- Connexion Supabase ----------
-  const SUPABASE_URL = 'https://amhnhxiykvjlxeibgatq.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtaG5oeGl5a3ZqbHhlaWJnYXRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzODQ3NTIsImV4cCI6MjA5OTk2MDc1Mn0.a9id4P053pv5rrKaqXOkYCV8CC1h_HNuYZp9mOoVaOQ';
+  const SUPABASE_URL = 'https://vgmcwpoinnuzjkkzntmt.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnbWN3cG9pbm51empra3pudG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNjEyNzUsImV4cCI6MjEwMjYzNzI3NX0.qmqe1GTDQz2n-8IC-LNGHsFM-l-wQJZnqLLbY2BODaE';
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // ---------- Embedded logo (self-contained, no external file needed) ----------
@@ -1002,7 +1049,7 @@
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-'+name).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    const navMap = { 'dash':'nav-production', 'article-create':'nav-article', 'article-detail':'nav-article', 'stock':'nav-stock', 'budget':'nav-budget' };
+    const navMap = { 'dash':'nav-production', 'of-new':'nav-production', 'bom':'nav-production', 'of-detail':'nav-production', 'article-create':'nav-article', 'article-detail':'nav-article', 'stock':'nav-stock', 'budget':'nav-budget' };
     const navBtn = document.getElementById(navMap[name]);
     if(navBtn) navBtn.classList.add('active');
     document.querySelector('.app-main').scrollTo(0,0);
@@ -1068,6 +1115,9 @@
   }
 
   function renderDashboard(){
+    if(window.VitafoamProduction && window.VitafoamProduction.renderDashboard){
+      return window.VitafoamProduction.renderDashboard();
+    }
     const k = currentPeriod === 'month' ? monthlyKpi : ytdKpi;
     const grid = document.getElementById('kpi-grid');
     grid.innerHTML = `
@@ -1213,7 +1263,7 @@
   // colle) et un code généré automatiquement. Les autres catégories
   // (MP, NEG, DIVERS) n'ont qu'un code article saisi manuellement.
   function categorieUtiliseCaracteristiques(cat){
-    return cat === 'PF' || cat === 'PSF';
+    return cat === 'PF' || cat === 'PSF' || cat === 'SF';
   }
 
   function toggleCategoryFields(){
@@ -1769,6 +1819,9 @@
   }
 
   async function renderStockExtraction(){
+    if(window.VitafoamProduction && window.VitafoamProduction.renderStockExtraction){
+      return window.VitafoamProduction.renderStockExtraction();
+    }
     const tbody = document.getElementById('stock-body');
     tbody.innerHTML = '<tr><td colspan="7">Chargement…</td></tr>';
 
@@ -1854,8 +1907,8 @@
     document.getElementById('login-form').addEventListener('submit', handleLogin);
 
     // Dashboard period toggle
-    document.getElementById('btn-month').addEventListener('click', () => setPeriod('month'));
-    document.getElementById('btn-ytd').addEventListener('click', () => setPeriod('ytd'));
+    document.getElementById('btn-month')?.addEventListener('click', () => setPeriod('month'));
+    document.getElementById('btn-ytd')?.addEventListener('click', () => setPeriod('ytd'));
 
     // Sidebar navigation (HubSpot-style: sidebar stays, only the content view swaps)
     document.getElementById('nav-production').addEventListener('click', () => { renderDashboard(); showView('dash'); });
@@ -1917,5 +1970,6 @@
     document.getElementById('stock-export-btn').addEventListener('click', exportStockCsv);
   });
 </script>
+<script src="./integrated.js"></script>
 </body>
 </html>
