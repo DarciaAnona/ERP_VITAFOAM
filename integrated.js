@@ -7,7 +7,8 @@
 let currentOFId = null;
 let currentOFData = null;
 let currentDebitageInputKg = 0;
-let bomState = { id:null, parent:null, mps:[] };
+let bomState = { id:null, parent:null, mps:[], createMode:false };
+let productionExtractionRows = [];
 
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num = v => Number(v || 0);
@@ -64,22 +65,139 @@ async function createOF(){
 // ---------- Nomenclatures ----------
 async function initBom(){
   const parent=document.getElementById('bom-parent'); if(!parent)return;
-  try{const all=await qArticles(['BLOC','MP']); const blocks=all.filter(a=>a.article_type==='BLOC'); bomState.mps=all.filter(a=>a.article_type==='MP'); parent.innerHTML=blocks.map(a=>`<option value="${a.id}">${esc(a.code)} — ${esc(a.designation||a.intitule)}</option>`).join(''); if(blocks[0]){parent.value=blocks[0].id;await loadBom(blocks[0].id)}}catch(e){banner('bom-banner',e.message,'warning')}
+  try{
+    const all=await qArticles(['BLOC','MP']);
+    const blocks=all.filter(a=>a.article_type==='BLOC');
+    bomState.mps=all.filter(a=>a.article_type==='MP');
+    parent.innerHTML=blocks.map(a=>`<option value="${a.id}">${esc(a.code)} — ${esc(a.designation||a.intitule)}</option>`).join('');
+    bomState.createMode=false;
+    if(blocks[0]){parent.value=blocks[0].id;await loadBom(blocks[0].id)}
+  }catch(e){banner('bom-banner',e.message,'warning')}
 }
 async function loadBom(parentId){
-  hideBanner('bom-banner'); bomState.parent=parentId; const {data:h,error}=await supabaseClient.from('bom_headers').select('*').eq('parent_article_id',parentId).eq('active',true).order('version',{ascending:false}).limit(1).maybeSingle(); if(error)return banner('bom-banner',error.message,'warning');
-  bomState.id=h?.id||null; document.getElementById('bom-version').value=h?.version||1; let vals={}; if(h){const {data:l}=await supabaseClient.from('bom_lines').select('*').eq('bom_id',h.id);(l||[]).forEach(x=>vals[x.component_id]=x.qty_standard)}
+  hideBanner('bom-banner'); bomState.parent=parentId; bomState.createMode=false;
+  const {data:h,error}=await supabaseClient.from('bom_headers').select('*').eq('parent_article_id',parentId).eq('active',true).order('version',{ascending:false}).limit(1).maybeSingle();
+  if(error)return banner('bom-banner',error.message,'warning');
+  bomState.id=h?.id||null;
+  document.getElementById('bom-version').value=h?.version||1;
+  let vals={};
+  if(h){const {data:l,error:le}=await supabaseClient.from('bom_lines').select('*').eq('bom_id',h.id);if(le)return banner('bom-banner',le.message,'warning');(l||[]).forEach(x=>vals[x.component_id]=x.qty_standard)}
+  document.getElementById('bom-panel-title').textContent=h?'Nomenclature active — Standard MP par bloc':'Aucune nomenclature active — créez le standard';
+  document.getElementById('bom-mode-note').textContent=h?`Version ${h.version} active. Toute modification enregistrée met à jour cette version.`:'Aucun standard actif pour cet article mère.';
+  renderBomLines(vals);
+}
+function renderBomLines(vals={}){
   document.getElementById('bom-lines-body').innerHTML=bomState.mps.map(m=>`<tr><td><strong>${esc(m.code)}</strong></td><td>${esc(m.designation||m.intitule)}</td><td>${esc(m.unite)}</td><td><input class="bom-qty" data-id="${m.id}" type="number" min="0" step="0.0001" value="${vals[m.id]??''}" placeholder="0"></td></tr>`).join('');
 }
+async function startNewBom(){
+  const parentId=document.getElementById('bom-parent')?.value;
+  if(!parentId)return banner('bom-banner','Sélectionnez d’abord un article mère Bloc.','warning');
+  const {data,error}=await supabaseClient.from('bom_headers').select('version').eq('parent_article_id',parentId).order('version',{ascending:false}).limit(1);
+  if(error)return banner('bom-banner',error.message,'warning');
+  const nextVersion=(data&&data[0]?Number(data[0].version):0)+1;
+  bomState.parent=parentId; bomState.id=null; bomState.createMode=true;
+  document.getElementById('bom-version').value=nextVersion;
+  document.getElementById('bom-panel-title').textContent='Créer une nouvelle nomenclature';
+  document.getElementById('bom-mode-note').textContent=`Nouvelle version ${nextVersion}. Saisissez les quantités standards par bloc puis enregistrez. L’ancienne version restera dans l’historique mais deviendra inactive.`;
+  renderBomLines({});
+  banner('bom-banner','Mode création : renseignez le nouveau standard puis cliquez sur « Enregistrer le standard ».','info');
+}
 async function saveBom(){
-  const parent=bomState.parent, version=+document.getElementById('bom-version').value||1; if(!parent)return; hideBanner('bom-banner');
+  const parent=bomState.parent||document.getElementById('bom-parent')?.value, version=+document.getElementById('bom-version').value||1;
+  if(!parent)return banner('bom-banner','Article mère obligatoire.','warning');
+  hideBanner('bom-banner');
+  const lines=[...document.querySelectorAll('.bom-qty')].map(x=>({component_id:x.dataset.id,qty_standard:num(x.value),unite:bomState.mps.find(m=>m.id===x.dataset.id)?.unite||'kg'})).filter(x=>x.qty_standard>0);
+  if(!lines.length)return banner('bom-banner','Saisissez au moins un composant avec une quantité standard supérieure à zéro.','warning');
   let id=bomState.id;
-  if(!id){const {data,error}=await supabaseClient.from('bom_headers').insert({parent_article_id:parent,version,active:true,notes:'Standard créé depuis ERP'}).select('id').single();if(error)return banner('bom-banner',error.message,'warning');id=data.id;}
-  else{const {error}=await supabaseClient.from('bom_headers').update({version,updated_at:new Date().toISOString()}).eq('id',id);if(error&&error.code!=='42703')return banner('bom-banner',error.message,'warning')}
-  const {error:del}=await supabaseClient.from('bom_lines').delete().eq('bom_id',id);if(del)return banner('bom-banner',del.message,'warning');
-  const lines=[...document.querySelectorAll('.bom-qty')].map(x=>({bom_id:id,component_id:x.dataset.id,qty_standard:num(x.value),unite:bomState.mps.find(m=>m.id===x.dataset.id)?.unite||'kg'})).filter(x=>x.qty_standard>0);
-  if(lines.length){const {error}=await supabaseClient.from('bom_lines').insert(lines);if(error)return banner('bom-banner',error.message,'warning')}
-  bomState.id=id;banner('bom-banner','✅ Nomenclature enregistrée. Elle servira de référence aux prochains OF.','success');
+  if(!id){
+    // Une seule version active par article mère. Les versions précédentes restent historisées.
+    const {error:deact}=await supabaseClient.from('bom_headers').update({active:false}).eq('parent_article_id',parent).eq('active',true);
+    if(deact)return banner('bom-banner',deact.message,'warning');
+    const {data,error}=await supabaseClient.from('bom_headers').insert({parent_article_id:parent,version,active:true,notes:'Standard créé depuis ERP'}).select('id').single();
+    if(error)return banner('bom-banner',error.message,'warning'); id=data.id;
+  } else {
+    const {error}=await supabaseClient.from('bom_headers').update({version,updated_at:new Date().toISOString()}).eq('id',id);
+    if(error&&error.code!=='42703')return banner('bom-banner',error.message,'warning');
+  }
+  const {error:del}=await supabaseClient.from('bom_lines').delete().eq('bom_id',id); if(del)return banner('bom-banner',del.message,'warning');
+  const payload=lines.map(x=>({...x,bom_id:id}));
+  const {error:ins}=await supabaseClient.from('bom_lines').insert(payload); if(ins)return banner('bom-banner',ins.message,'warning');
+  bomState.id=id; bomState.createMode=false;
+  banner('bom-banner','✅ Nomenclature enregistrée et activée. Elle servira de référence aux prochains OF.','success');
+  await loadBom(parent);
+}
+
+// ---------- Extraction Production / Analyse CDG ----------
+async function initProductionExtraction(){
+  const from=document.getElementById('prod-extract-from'),to=document.getElementById('prod-extract-to'),block=document.getElementById('prod-extract-block');
+  if(!from||!to||!block)return;
+  const now=new Date(); const first=new Date(now.getFullYear(),now.getMonth(),1);
+  if(!from.value)from.value=first.toISOString().slice(0,10);
+  if(!to.value)to.value=now.toISOString().slice(0,10);
+  try{const blocks=await qArticles(['BLOC']);block.innerHTML='<option value="">Tous les blocs</option>'+blocks.map(a=>`<option value="${a.id}">${esc(a.code)} — ${esc(a.designation||a.intitule)}</option>`).join('')}catch(e){banner('prod-extract-banner',e.message,'warning')}
+}
+function prodDate(of){return (of.planned_date||of.created_at||'').slice(0,10)}
+function isKgUnit(u){return String(u||'').toLowerCase().replace(/\s/g,'')==='kg'}
+function productionExportRowBase(of,article,stage,plannedM3,actualM3,plannedKg,actualKg){return {stage,of_number:of.of_number,date:prodDate(of),site:of.site||'',article_code:article?.code||'',article_designation:article?.designation||article?.intitule||'',planned_m3:plannedM3,actual_m3:actualM3,planned_kg:plannedKg,actual_kg:actualKg}}
+async function runProductionExtraction(){
+  const body=document.getElementById('prod-extract-body'); if(!body)return;
+  body.innerHTML='<tr><td colspan="16">Extraction en cours…</td></tr>'; hideBanner('prod-extract-banner'); productionExtractionRows=[];
+  try{
+    const filters={from:document.getElementById('prod-extract-from').value,to:document.getElementById('prod-extract-to').value,site:document.getElementById('prod-extract-site').value,status:document.getElementById('prod-extract-status').value,block:document.getElementById('prod-extract-block').value,of:document.getElementById('prod-extract-of').value.trim().toLowerCase()};
+    let q=supabaseClient.from('production_orders').select('*,block:articles!production_orders_block_article_id_fkey(*)').order('created_at',{ascending:false});
+    if(filters.site)q=q.eq('site',filters.site); if(filters.status)q=q.eq('status',filters.status); if(filters.block)q=q.eq('block_article_id',filters.block);
+    const {data:ofs,error}=await q; if(error)throw error;
+    const selected=(ofs||[]).filter(of=>{const d=prodDate(of);return (!filters.from||d>=filters.from)&&(!filters.to||d<=filters.to)&&(!filters.of||String(of.of_number).toLowerCase().includes(filters.of))});
+    if(!selected.length){body.innerHTML='<tr><td colspan="16">Aucun OF ne correspond aux filtres.</td></tr>';return}
+    for(const of of selected){
+      const [stdR,wR,vcR,doR,cbR]=await Promise.all([
+        supabaseClient.from('production_order_standards').select('*,component:articles!production_order_standards_component_id_fkey(*)').eq('of_id',of.id),
+        supabaseClient.from('block_weighings').select('*').eq('of_id',of.id),
+        supabaseClient.from('viking_consumptions').select('*,component:articles!viking_consumptions_component_id_fkey(*)').eq('of_id',of.id),
+        supabaseClient.from('debitage_outputs').select('*,article:articles!debitage_outputs_article_id_fkey(*)').eq('of_id',of.id),
+        supabaseClient.from('confection_batches').select('*,finished:articles!confection_batches_finished_article_id_fkey(*)').eq('of_id',of.id)
+      ]);
+      for(const r of [stdR,wR,vcR,doR,cbR])if(r.error)throw r.error;
+      const standards=stdR.data||[],weigh=wR.data||[],vcons=vcR.data||[],outputs=doR.data||[],batches=cbR.data||[];
+      const plannedM3=num(of.block?.volume_mousse)*num(of.planned_blocks);
+      const actualBlockM3=num(of.block?.volume_mousse)*weigh.length;
+      const plannedKg=standards.filter(x=>isKgUnit(x.unite)).reduce((s,x)=>s+num(x.qty_planned),0);
+      const actualKg=weigh.reduce((s,x)=>s+num(x.weight_kg),0);
+      const stdMap=Object.fromEntries(standards.map(x=>[x.component_id,x]));
+      if(vcons.length){
+        for(const c of vcons){const st=stdMap[c.component_id];productionExtractionRows.push({...productionExportRowBase(of,of.block,'VIKING / BLOC',plannedM3,actualBlockM3,plannedKg,actualKg),cons_type:'MP',component_code:c.component?.code||'',component_designation:c.component?.designation||c.component?.intitule||'',cons_qty:num(c.actual_qty),cons_unit:c.component?.unite||st?.unite||'',pru:num(c.pru),value:num(c.value),planned_component_qty:st?num(st.qty_planned):''})}
+      } else {
+        productionExtractionRows.push({...productionExportRowBase(of,of.block,'VIKING / BLOC',plannedM3,actualBlockM3,plannedKg,actualKg),cons_type:'MP',component_code:'—',component_designation:'Aucune consommation réelle saisie',cons_qty:'',cons_unit:'',pru:'',value:'',planned_component_qty:''});
+      }
+      if(batches.length){
+        const batchIds=batches.map(b=>b.id); const {data:cc,error:ce}=await supabaseClient.from('confection_consumptions').select('*,component:articles!confection_consumptions_component_id_fkey(*)').in('batch_id',batchIds); if(ce)throw ce;
+        const consByBatch={};(cc||[]).forEach(c=>(consByBatch[c.batch_id]||(consByBatch[c.batch_id]=[])).push(c));
+        const outMap=Object.fromEntries(outputs.map(o=>[o.id,o]));
+        for(const b of batches){
+          const pf=b.finished,actualM3=num(pf?.volume_mousse)*num(b.qty_finished),src=outMap[b.source_output_id];
+          const actualPfKg=src&&num(src.qty_pcs)>0?num(src.weight_kg)*(num(b.qty_input)/num(src.qty_pcs)):0;
+          const bc=consByBatch[b.id]||[];
+          if(bc.length){for(const c of bc)productionExtractionRows.push({...productionExportRowBase(of,pf,'CONFECTION / PF','',actualM3,'',actualPfKg),cons_type:'PSF',component_code:c.component?.code||'',component_designation:c.component?.designation||c.component?.intitule||'',cons_qty:num(c.actual_qty),cons_unit:c.component?.unite||'',pru:num(c.pru),value:num(c.value),planned_component_qty:''})}
+          else productionExtractionRows.push({...productionExportRowBase(of,pf,'CONFECTION / PF','',actualM3,'',actualPfKg),cons_type:'PSF',component_code:'—',component_designation:'Aucune consommation PSF saisie',cons_qty:'',cons_unit:'',pru:'',value:'',planned_component_qty:''});
+        }
+      }
+    }
+    renderProductionExtractionRows(); banner('prod-extract-banner',`✅ ${productionExtractionRows.length} ligne(s) extraite(s) pour ${selected.length} OF.`, 'success');
+  }catch(e){console.error('Extraction production',e);body.innerHTML='<tr><td colspan="16">Erreur d’extraction.</td></tr>';banner('prod-extract-banner',e.message||String(e),'warning')}
+}
+function cellNum(v,d=3){return v===''||v===null||v===undefined?'—':nfmt(v,d)}
+function renderProductionExtractionRows(){
+  const body=document.getElementById('prod-extract-body');
+  if(!productionExtractionRows.length){body.innerHTML='<tr><td colspan="16">Aucune donnée extraite.</td></tr>';return}
+  body.innerHTML=productionExtractionRows.map(r=>`<tr><td>${esc(r.stage)}</td><td><strong>${esc(r.of_number)}</strong></td><td>${esc(r.date)}</td><td>${esc(r.site)}</td><td>${esc(r.article_code)}</td><td>${esc(r.article_designation)}</td><td>${cellNum(r.planned_m3,4)}</td><td>${cellNum(r.actual_m3,4)}</td><td>${cellNum(r.planned_kg,3)}</td><td>${cellNum(r.actual_kg,3)}</td><td>${esc(r.cons_type)}</td><td>${esc(r.component_code)}${r.component_designation&&r.component_designation!=='—'?' — '+esc(r.component_designation):''}</td><td>${cellNum(r.cons_qty,4)}</td><td>${esc(r.cons_unit||'—')}</td><td>${r.pru===''?'—':fmtMga(num(r.pru))}</td><td>${r.value===''?'—':fmtMga(num(r.value))}</td></tr>`).join('');
+}
+function exportProductionExtraction(){
+  if(!productionExtractionRows.length)return alert("Lancez d'abord une extraction Production.");
+  const rows=[['Étape','N° OF','Date','Site','Article produit','Désignation','Qté prévue m3','Qté réelle m3','Qté prévue kg','Qté réelle kg','Type conso','Code MP/PSF','Désignation MP/PSF','Qté consommée','Unité','PRU MGA','Valeur MGA'],...productionExtractionRows.map(r=>[r.stage,r.of_number,r.date,r.site,r.article_code,r.article_designation,r.planned_m3,r.actual_m3,r.planned_kg,r.actual_kg,r.cons_type,r.component_code,r.component_designation,r.cons_qty,r.cons_unit,r.pru,r.value])];
+  downloadCsv(`extraction_production_vitafoam_${new Date().toISOString().slice(0,10)}.csv`,rows);
+}
+function clearProductionExtraction(){
+  document.getElementById('prod-extract-site').value='';document.getElementById('prod-extract-status').value='';document.getElementById('prod-extract-block').value='';document.getElementById('prod-extract-of').value='';productionExtractionRows=[];document.getElementById('prod-extract-body').innerHTML='<tr><td colspan="16">Choisissez vos filtres puis cliquez sur « Extraire les données ».</td></tr>';hideBanner('prod-extract-banner');
 }
 
 // ---------- Fiche OF ----------
@@ -151,6 +269,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('of-create-btn')?.addEventListener('click',createOF);
   document.getElementById('bom-parent')?.addEventListener('change',e=>loadBom(e.target.value));
   document.getElementById('bom-save-btn')?.addEventListener('click',saveBom);
+  document.getElementById('bom-new-btn')?.addEventListener('click',startNewBom);
+  document.getElementById('bom-back-btn')?.addEventListener('click',async()=>{showView('dash');await renderDashboard();await initProductionExtraction()});
+  document.getElementById('prod-extract-run')?.addEventListener('click',runProductionExtraction);
+  document.getElementById('prod-extract-export')?.addEventListener('click',exportProductionExtraction);
+  document.getElementById('prod-extract-clear')?.addEventListener('click',clearProductionExtraction);
+  initProductionExtraction();
   document.getElementById('of-detail-back')?.addEventListener('click',async()=>{showView('dash');await renderDashboard()});
   document.querySelectorAll('#ofd-tabs button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#ofd-tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.ofd-tab').forEach(x=>x.classList.add('hidden'));document.getElementById('ofd-tab-'+b.dataset.tab).classList.remove('hidden')}));
   document.getElementById('nav-stock')?.addEventListener('click',initStockModule);
@@ -169,6 +293,8 @@ window.VitafoamProduction = {
   openOF,
   initStockModule,
   renderStockExtraction,
-  renderBudget
+  renderBudget,
+  runProductionExtraction,
+  initProductionExtraction
 };
 })();
