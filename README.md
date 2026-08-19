@@ -1,71 +1,73 @@
-# VITAFOAM ERP intégré — Supabase
+# VITAFOAM ERP — Supabase — Version 3.0.0
 
-Cette version fusionne le précédent ERP Articles / Stock / Budget avec le circuit de production :
+Cette version contient les modules déjà développés : Articles, Production, Nomenclatures, OF Bloc, Viking/Séchoir, Débitage/Tamponnage, Confection, Stock et Budget.
 
-**Nomenclature Bloc → OF → Viking/Séchoir → Débitage/Tamponnage → Confection → Stock PF**
+## Nouvelle règle Article / Société / Site
 
-## 1. Initialiser Supabase
+Pour tout article **géré en stock**, le site principal est automatique et obligatoire :
 
-Le frontend est déjà configuré sur le projet Supabase :
+- `VT` → `VITA` → **Vitafoam Tana**
+- `VD` → `VIDIE` → **Vitafoam Diego**
+- `VS` → `VISA` → **Vitafoam Sambava**
 
-`https://vgmcwpoinnuzjkkzntmt.supabase.co`
+Lors de la création, l'utilisateur choisit le code société mais **ne choisit plus librement le site principal**. L'ERP l'affecte automatiquement.
 
-Dans **Supabase > SQL Editor**, ouvrir `supabase/setup.sql`, copier tout le script et l'exécuter.
+Pour rattacher un article déjà existant à un autre site :
 
-> IMPORTANT : `setup.sql` réinitialise les tables du prototype `public` concernées par cet ERP. Il faut donc l'utiliser sur le projet de développement/prototype ou après sauvegarde des données utiles.
+1. Ouvrir l'article.
+2. Cliquer sur **Modifier**.
+3. Dans **Article site**, les sites déjà rattachés sont cochés et verrouillés.
+4. Cocher le ou les nouveaux sites : Vitafoam Tana, Vitafoam Diego, Vitafoam Sambava.
+5. Cliquer sur **Enregistrer / rattacher**.
 
-Le script crée :
-- le référentiel Articles commun au stock et à la production ;
-- les nomenclatures Bloc et leurs composants MP ;
-- les OF et le gel de leur standard ;
-- Viking/Séchoir et les pesées ;
-- Débitage/Tamponnage, conforme, souple et chutes ;
-- Confection et consommations PSF ;
-- les mouvements de stock ;
-- les fonctions Supabase RPC qui sécurisent les validations métier ;
-- la vue de synthèse des OF.
+Le code article reste unique. L'ERP ajoute seulement un rattachement dans `article_sites`.
 
-## 2. Installer / démarrer
+## SQL Supabase
 
-Dans PowerShell :
+### Base Supabase déjà utilisée par l'ERP (recommandé)
+
+Copier-coller dans **Supabase > SQL Editor** le fichier :
+
+`SUPABASE_SQL_A_COPIER.sql`
+
+Cette migration est **non destructive** : elle conserve les articles, stocks, OF et données de production existants.
+
+### Nouvelle base vide uniquement
+
+Utiliser :
+
+`SUPABASE_SQL_COMPLET_NOUVELLE_BASE.sql`
+
+Attention : le script complet contient le setup prototype qui réinitialise les tables de l'ERP.
+
+## Lancer localement
 
 ```powershell
 npm install
 npm run dev
 ```
 
-Puis ouvrir :
+Puis ouvrir l'URL affichée par Vite, normalement `http://localhost:5173/`.
 
-`http://localhost:5173/`
+## Build Vercel
 
-Si `node_modules` est déjà présent dans votre ancien dossier Vite, vous pouvez remplacer les fichiers par ceux de cette version puis lancer directement `npm install` une fois pour synchroniser les dépendances.
+```powershell
+npm run build
+```
 
-## 3. Test conseillé
+Paramètres Vercel :
 
-1. **Nomenclatures** : sélectionner BLOC SGA et vérifier/remplacer le standard exemple.
-2. **Nouvel OF Bloc** : créer un OF SGA.
-3. Ouvrir l'OF depuis **Production**.
-4. **Viking/Séchoir** : saisir consommations réelles, blocs, chutes et poids de chaque bloc après séchage.
-5. **Débitage** : saisir conforme, souple, croûte, chemelle, filement, autres. L'écart matière doit être ≤ 0,05 kg.
-6. **Confection** : traiter les sorties. Le souple impose automatiquement **gaine seule**.
-7. **Stock** : vérifier les sorties MP et l'entrée PF.
-8. **Budget** : actualiser la valorisation.
+- Framework Preset : Vite
+- Build Command : `npm run build`
+- Output Directory : `dist`
+- Install Command : `npm install`
 
-## 4. Règles métier déjà automatisées
+`integrated.js` est chargé en `type="module"` pour que Vite l'intègre correctement au build de production.
 
-- N° OF automatique.
-- Nomenclature active copiée/figée dans l'OF.
-- Besoin MP théorique = standard par bloc × blocs prévus.
-- Valeur consommation = quantité réelle × PRU.
-- Nombre de pesées = nombre de blocs conformes.
-- Poids total après séchage transmis automatiquement au Débitage.
-- Bilan matière Débitage obligatoire.
-- Souple = chute valorisable de la ligne, mais transférable à Confection.
-- Souple → gaine seule.
-- PF + rebut = quantité entrée en Confection.
-- Entrée PF et sorties MP/PSF créées automatiquement dans les mouvements de stock.
-- Les transferts internes ne sont pas comptés comme entrée/sortie globale dans l'état de stock.
+## Contrôle de version
 
-## 5. Sécurité
+Dans la console du navigateur, cette version affiche :
 
-La version fournie est volontairement en **mode prototype** avec des policies RLS ouvertes à `anon` afin de fonctionner immédiatement avec la clé publique. Avant un déploiement réel en usine, activer Supabase Auth et créer des rôles (Admin, Viking, Débitage, Confection, Magasin, CDG) avec des policies RLS restrictives.
+`[VITAFOAM ERP] Version 3.0.0 — rattachement multi-sites articles`
+
+Cela permet de vérifier rapidement que Vercel sert bien la dernière version.
